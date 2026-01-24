@@ -46,3 +46,6 @@ Secrets can be:
 **1.** Most of platforms have their own Identity Providers (IDP). The problem of migrating applications or running applications across those different platforms or cloud providers is sometime a challenge. Vault comes with a solution to face this important challenge. 
 
 **2.** For instance, instead of migrating individually with each IDP, all those platforms can be integrated directly in vault with vault alone. So Vault can go dynamically grab credentials out of each one of the platforms. What the applications only have to do, it's go to Vault, because Vault is the single source of trust for all of the different IDPs.
+
+Next [Namespaces-Labels-Selectors-Annotations](./05-Namespaces-Labels-Selectors-Annotations.md)
+
