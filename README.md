@@ -51,5 +51,5 @@ Secrets can be:
 [How Vault help improve our Security Posture](./pages/RP1_How_Vault_Improves_Security.md)
 
 # What next ?
-[Installing and running Vault](./05-Namespaces-Labels-Selectors-Annotations.md)
+[Installing and running Vault](./pages/Lesson1_Installing_and_running_vault.md)
 
