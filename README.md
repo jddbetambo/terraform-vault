@@ -47,5 +47,9 @@ Secrets can be:
 
 **2.** For instance, instead of migrating individually with each IDP, all those platforms can be integrated directly in vault with vault alone. So Vault can go dynamically grab credentials out of each one of the platforms. What the applications only have to do, it's go to Vault, because Vault is the single source of trust for all of the different IDPs.
 
-Next [Namespaces-Labels-Selectors-Annotations](./05-Namespaces-Labels-Selectors-Annotations.md)
+# Role Play
+[How Vault help improve our Security Posture](./pages/RP1_How_Vault_Improves_Security.md)
+
+# What next ?
+[Installing and running Vault](./05-Namespaces-Labels-Selectors-Annotations.md)
 
