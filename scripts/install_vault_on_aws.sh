@@ -20,10 +20,14 @@ chmod +x /usr/local/bin/vault
 # Vault config (integrated storage + AWS auto-join)
 cluster_tag_key="vault-cluster"
 cluster_tag_value="vault-prod-cluster"
+cluster_name="vault-prod"
+LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+HOSTNAME=$(hostname)
+
 
 cat <<EOT > /etc/vault.d/vault.hcl
 ui = true
-cluster_name = "vault-prod"
+cluster_name="${cluster_name}"
 
 listener "tcp" {
   address         = "0.0.0.0:8200"
@@ -33,7 +37,8 @@ listener "tcp" {
 
 storage "raft" {
   path    = "/opt/vault/data"
-  node_id = "$(hostname)"
+  node_id = "${HOSTNAME}"
+
 
   retry_join {
     auto_join = "provider=aws tag_key=${cluster_tag_key} tag_value=${cluster_tag_value} addr_type=private_v4"
@@ -45,8 +50,8 @@ seal "awskms" {
   kms_key_id = "arn:aws:kms:us-east-1:445567107707:key/9d1b7e9f-e793-48db-85a3-0366505eb640"
 }
 
-api_addr     = "http://$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):8200"
-cluster_addr = "http://$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):8201"
+api_addr     = "http://${LOCAL_IP}:8200"
+cluster_addr = "http://${LOCAL_IP}:8201"
 
 disable_mlock = true
 EOT

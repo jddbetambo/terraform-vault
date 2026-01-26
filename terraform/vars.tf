@@ -94,3 +94,9 @@ variable "cluster_tag_value" {
   type        = string
   default     = "vault-prod-cluster"
 }
+
+variable "alb_certificate_arn" {
+  description = "ARN of the SSL certificate for the ALB"
+  type        = string
+  default     = "" // Add your certificate ARN here for HTTPS
+}

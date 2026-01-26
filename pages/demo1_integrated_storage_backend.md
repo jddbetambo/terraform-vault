@@ -4,21 +4,85 @@
     <img src="../images/demo1.png">
 </p>
 
+## Why the ALB is Important in a Vault Architecture
+1. Single, stable endpoint for clients 
+- Without an ALB, clients must talk directly to individual Vault nodes
+- That’s fragile. Nodes restart, fail, scale, or get replaced.
+- With an ALB, clients use one endpoint
+- The ALB handles routing to the correct node automatically
+
+2. Health‑aware routing
+- Vault exposes a health endpoint. The ALB continuously checks this and only sends traffic to nodes that are unsealed, active or standby, healthy
+- This prevents clients from hitting sealed nodes, nodes still joining the cluster, nodes in maintenance, nodes recovering from Raft sync. This is essential for high availability.
+
+**3. TLS termination (optional but common)**
+The ALB can terminate TLS using an ACM certificate: 
+- Simplifies certificate management, 
+- Offloads TLS from Vault nodes, 
+- Lets you rotate certificates without touching Vault
+You can still run Vault with TLS internally if you want end‑to‑end encryption.
+
+**4. Load balancing across standby nodes**
+Vault’s Raft architecture allows:
+- 1 active node
+- N standby nodes
+Standby nodes can serve read‑only requests (depending on your setup).
+The ALB distributes traffic intelligently, improving performance and reducing load on the active node.
+
+**5. Automatic failover**
+If the active node fails:
+- Raft elects a new leader
+- ALB automatically routes traffic to the new active node
+    - No DNS changes
+    - No client reconfiguration
+    - No manual intervention
+This is a huge operational win.
+
+**6. Security isolation**
+The ALB acts as a controlled entry point:
+- Only the ALB can reach port 8200 on Vault nodes
+- Clients never talk directly to EC2 instances
+- You can enforce WAF rules, IP restrictions, or mTLS at the ALB layer
+This reduces the attack surface dramatically.
+
+**7. Scalability and future-proofing**
+If you add more Vault nodes:
+- Just tag them correctly
+- They auto-join the cluster
+- ALB automatically starts routing to them
+No client changes needed.
+
+🧠 In short
+The ALB gives you:
+- High availability
+- Health-aware routing
+- TLS termination
+- Security isolation
+- Operational simplicity
+- A single stable endpoint
+**Without an ALB, you lose most of the reliability and manageability that make Vault production-ready.**
+
+
 ## High-level architecture
-- **3 EC2 instances** in the same VPC, same region.
+
+<p align="center">
+    <img src="../images/demo1_3.png">
+</p>
+
+- **4 EC2 instances** in the same VPC, same region.
 - **Vault integrated storage (Raft)** for HA and data durability.
-- **One load balancer** (optional but recommended) in front of the nodes.
-- **TLS everywhere** (self-signed or ACM behind ALB).
+- **One load balancer** in front of the nodes.
+- **TLS everywhere** (self-signed or ACM behind ALB) but not use here because of missing a valide certificate
 - **Security groups** tightly scoped to:
     - Allow Vault API port (e.g. 8200) only from trusted sources / load balancer.
     - Allow Raft port (e.g. 8201) only between Vault nodes.
 
 ## Network and ports
-Pick ports (defaults are fine)
+**Pick ports (defaults are fine)**
 - API: 8200/tcp
 - Raft: 8201/tcp
 
-Security group rules:
+**Security group rules:**
 - Inbound 8200: from your admin IPs and/or load balancer.
 - Inbound 8201: from the other Vault nodes’ security group only.
 - SSH 22: from your admin IPs.
@@ -33,131 +97,42 @@ Below is a clean pattern:
     - Configures integrated storage (Raft)
     - Uses AWS auto-join based on tags to form the cluster.
 
-## 2. Terraform: provider and basics
+## 2. Terraform files
+You can fin Terraform files in the terraform directory in the project.
+- [main.tf](../terraform/main.tf)
+- [network.tf](../terraform/network.tf)
+- [output.tf](../terraform/output.tf)
+- [provider.tf](../terraform/provider.tf)
+- [security.tf](../terraform/security.tf)
+- [vars.tf](../terraform/vars.tf)
+- [json file policy for ec2 and KMS](../terraform/ec2-policy.json)
+- [json file role](../terraform/ec2-role.json)
+- [user data bash script](../scripts/install_vault_on_aws.sh)
 
-```bash
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = "us-east-1"
-}
-```
-
-## 2. Security group for Vault cluster
-```bash
-resource "aws_security_group" "vault" {
-  name        = "vault-cluster-sg"
-  description = "Security group for Vault cluster"
-  vpc_id      = var.vpc_id
-
-  # Vault API (from your IP / load balancer)
-  ingress {
-    description = "Vault API"
-    from_port   = 8200
-    to_port     = 8200
-    protocol    = "tcp"
-    cidr_blocks = [var.admin_cidr] # e.g. "x.x.x.x/32" or LB subnet
-  }
-
-  # Raft traffic (between nodes only)
-  ingress {
-    description = "Vault Raft"
-    from_port   = 8201
-    to_port     = 8201
-    protocol    = "tcp"
-    self        = true
-  }
-
-  # SSH (optional)
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.admin_cidr]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "vault-cluster-sg"
-  }
-}
-```
-
-## 3. IAM role so Vault can auto-join via AWS
-
-```bash
-resource "aws_iam_role" "vault" {
-  name = "vault-ec2-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy" "vault" {
-  name = "vault-ec2-describe"
-  role = aws_iam_role.vault.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = ["ec2:DescribeInstances"]
-      Resource = "*"
-    }]
-  })
-}
-
-resource "aws_iam_instance_profile" "vault" {
-  name = "vault-ec2-instance-profile"
-  role = aws_iam_role.vault.name
-}
-```
 
 ## 4. User data: install and configure Vault with integrated storage
 
 You can download the bash script [here](../scripts/install_vault_on_aws.sh). Other Terraform scripts can be found in the directory called Terraform in this project.
 
 ## 5. What happens when you `terraform apply`
-1. Terraform creates:
+**1. Terraform creates:**
 - Security group
 - IAM role + instance profile
 - 4 EC2 instances with the right tags
 
-2. Each instance:
+**2. Each instance:**
 - Installs Vault
 - Writes a Raft + auto-join config
 - Starts vault.service
 
-3. Vault nodes discover each other using:
+**3. Vault nodes discover each other using:**
 - `auto_join = "provider=aws tag_key=vault-cluster tag_value=vault-prod-cluster addr_type=private_v4"`
 
-You still need to:
+**You still need to:**
 - Run `vault operator init` once against any node (or via the load balancer if you add one).
 - Unseal nodes (or configure AWS KMS auto-unseal later).
 
-If you want to go one level further, we can:
+**If you want to go one level further, we can:**
 - Add an NLB/ALB in Terraform in front of the 3 nodes.
 - Wire in AWS KMS auto-unseal so the cluster comes up fully usable with zero manual unseal.
 

@@ -17,6 +17,16 @@
                 "ec2:DescribeTags"
             ],
             "Resource" : "*"
-        }
+        },
+        {
+            "Effect" : "Allow",
+            "Action" : [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:GenerateDataKey",
+                "kms:DescribeKey"
+            ],
+            "Resource" : "*"
+      }
     ]
 }

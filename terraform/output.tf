@@ -12,8 +12,6 @@ output "AWS_Network_Information" {
                     "Availability Zone: " : "${var.AVAILABLE_REGIONS[var.AWS_REGIONS_INDEX]}a",
                     "VPC Name: " : aws_vpc.VPC-Vault.tags.Name,
                     "VPC CIDR:" : aws_vpc.VPC-Vault.cidr_block,
-                    "Public Subnet:" : aws_subnet.Public-Subnet-Vault.cidr_block,
-                    "Private Subnet:" : aws_subnet.Private-Subnet-Vault.cidr_block,
                 } 
 }
 
