@@ -52,7 +52,7 @@ If you add more Vault nodes:
 - ALB automatically starts routing to them
 No client changes needed.
 
-🧠 In short
+**🧠 In short**
 The ALB gives you:
 - High availability
 - Health-aware routing
@@ -107,14 +107,13 @@ You can fin Terraform files in the terraform directory in the project.
 - [vars.tf](../terraform/vars.tf)
 - [json file policy for ec2 and KMS](../terraform/ec2-policy.json)
 - [json file role](../terraform/ec2-role.json)
-- [user data bash script](../scripts/install_vault_on_aws.sh)
 
 
-## 4. User data: install and configure Vault with integrated storage
+## 3. User data: install and configure Vault with integrated storage
 
 You can download the bash script [here](../scripts/install_vault_on_aws.sh). Other Terraform scripts can be found in the directory called Terraform in this project.
 
-## 5. What happens when you `terraform apply`
+## 4. What happens when you `terraform apply`
 **1. Terraform creates:**
 - Security group
 - IAM role + instance profile
@@ -128,11 +127,31 @@ You can download the bash script [here](../scripts/install_vault_on_aws.sh). Oth
 **3. Vault nodes discover each other using:**
 - `auto_join = "provider=aws tag_key=vault-cluster tag_value=vault-prod-cluster addr_type=private_v4"`
 
-**You still need to:**
-- Run `vault operator init` once against any node (or via the load balancer if you add one).
-- Unseal nodes (or configure AWS KMS auto-unseal later).
 
-**If you want to go one level further, we can:**
-- Add an NLB/ALB in Terraform in front of the 3 nodes.
-- Wire in AWS KMS auto-unseal so the cluster comes up fully usable with zero manual unseal.
+## 5. Testing the deployment
+1. Open your AWS EC2 Dashboard. Go to Load Balancers section, select the ALB created and copy the ALB DNS name.
+2. Attach the protocol in front of the ALB DSN name. If you are using the HTPPS you will have **https://<alb_dns_name>**. If you are using the HTTP protocol, then you will have **http://<alb_dns_name**>. 
+In this demo, the HTTP protocol has been used and the ALB DNS name is *vault-alb-787536895.us-east-1.elb.amazonaws.com*. The Full Qualidied Domain Name (FQDN) is *http://vault-alb-787536895.us-east-1.elb.amazonaws.com*
+3. Connect to each node and open a nex terminal. 
+4. Export the environment variable and initialize vault
+
+```bash
+export VAULT_ADDR="http://vault-alb-787536895.us-east-1.elb.amazonaws.com"
+```
+```bash
+vault operator init
+```
+<p>
+    <img src="../images/demo1_1.png">
+</p>
+
+5. Check the status of vault in the node
+```bash
+vault status
+```
+<p>
+    <img src="../images/demo1_2.png">
+</p>
+
+
 
