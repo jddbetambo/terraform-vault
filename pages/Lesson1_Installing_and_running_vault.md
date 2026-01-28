@@ -225,3 +225,6 @@ sudo systemctl status vault
 - ELiminates the need to run a Consul cluster and manage it
 
 [Demo Deploying the Integrated Storage Backend](./demo1_integrated_storage_backend.md)
+
+# What next ?
+[Vault architecture](Lesson2_Vault_Architecture.md) 
