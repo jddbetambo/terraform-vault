@@ -24,7 +24,7 @@ cluster_name="vault-prod"
 LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 HOSTNAME=$(hostname)
 
-
+# Make sure that you replace the <kms_arn> with the actual ARN of your AWS KMS key that you want to use for sealing the vault.
 cat <<EOT > /etc/vault.d/vault.hcl
 ui = true
 cluster_name="${cluster_name}"
@@ -47,7 +47,7 @@ storage "raft" {
 
 seal "awskms" {
   region = "us-east-1"
-  kms_key_id = "arn:aws:kms:us-east-1:445567107707:key/9d1b7e9f-e793-48db-85a3-0366505eb640"
+  kms_key_id = "<kms_arn>"
 }
 
 api_addr     = "http://${LOCAL_IP}:8200"

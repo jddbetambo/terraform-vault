@@ -21,7 +21,7 @@ Having multiple auth methods enables you to use an auth method that makes the mo
 
 - enable - enable a new auth method
 - disable - desable a auth method (the name ot he mount we want to disable not the type of the auth method)
-- liste - list enabled auth methods 
+- list - list enabled auth methods 
 - tune - used to modify an auth method
 - help - show information how to use vault auth commande
 
@@ -113,7 +113,6 @@ vault read auth/jdtech/role/joe
 ## 1.2 Vault Auth configuration using API
 
 **1. Enable the AppRole Auth Method**
-First, enable the AppRole authentication backend:
 
 - Create an `auth.json` file:
 
@@ -141,9 +140,8 @@ vault auth list
 You should see an entry for `approle/`.
 
 **2. Create an AppRole with Policies**
-Define which policies this AppRole will use:
 
-- Create `policies.json`:
+- Define which policies this AppRole will use `policies.json`:
 
 ```bash
 {
@@ -163,6 +161,7 @@ curl --header "X-Vault-Token: $VAULT_TOKEN" \
 A successful response confirms the role is created.
 
 **3. Fetch the Role ID**
+
 Each AppRole has a unique `Role ID`. Retrieve it:
 
 ```bash
@@ -173,6 +172,7 @@ curl --header "X-Vault-Token: $VAULT_TOKEN" \
 Inspect `data.role_id` in the JSON response.
 
 **4. Generate a Secret ID**
+
 Generate the `Secret ID` needed alongside the `Role ID`:
 
 ```bash
@@ -205,6 +205,7 @@ curl --request POST \
 There are a few ways to autenticate to Vault when using CLI
 
 **1. Use the vault login command**
+
 - Authenticate using a token or another auth method
 - Make use of a CLI token helper
 
