@@ -1,5 +1,3 @@
-# Vault Tokens
-
 # 1. Introduction to Vault Token
 
 Tokens are the core method for authentication within Vault. Tokens can be used directly or auth methods can be used to dynamically generate tokens based on external identities. Within Vault, tokens map to information. The most important information mapped to a token is a set of one or more attached policies. These policies control what the token holder is allowed to do within Vault. Other mapped information includes metadata that can be viewed and is added to the audit log, such as creation time, last renewal time, and more.

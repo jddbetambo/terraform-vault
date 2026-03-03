@@ -1,7 +1,5 @@
 # Vault Agent
 
-# Introduction
-
 Vault Agent aims to remove the initial hurdle to adopt Vault by providing a more scalable and simpler way for applications to integrate with Vault, by providing the ability to render templates containing the secrets required by your application, without requiring changes to your application.
 
 Vault Agent is a client daemon that provides the following features:

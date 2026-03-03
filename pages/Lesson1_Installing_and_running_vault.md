@@ -1,6 +1,4 @@
-# Installing Vault
-
-## Installing Vault on Linux Ubuntu
+# Installing Vault on Linux Ubuntu
 
 1. Go to the following [link](https://releases.hashicorp.com/vault) and see the available vault version for your computer achitecture 
 2. Open a terminal on your Linux machine
@@ -34,7 +32,7 @@ vault version
     <img src="../images/running_dev_server.png">
 </p>
 
-## Running Vault in Dev mode
+
 1. Make sure you have downloaded and install Vault
 2. Open a new terminal on your computer
 3. Type the following to run Vault in Dev mode
@@ -67,7 +65,8 @@ vault status
     <img src="../images/running_prod_server2.png">
 </p>
 
-## Basics configurations to run Vault in Production Mode
+## 1. Basics configurations to run Vault in Production Mode
+
 1. Make sure that Vault is correctly installed on your computer
 2. Open a new terminal
 3. Create a group user for Vault
@@ -193,7 +192,7 @@ sudo chmod 0664 /etc/systemd/system/vault.service
 sudo systemctl daemon-reload
 ```
 
-## Launching Vault in Production Mode
+## 2. Launching Vault in Production Mode
 Vault in Prod Mode must be run as a user but not as root. Make sure that you exit as root in the actual terminal or simply open a new terminal and launch the Vault service.
 
 ```bash

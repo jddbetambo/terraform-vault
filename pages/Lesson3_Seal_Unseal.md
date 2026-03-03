@@ -21,7 +21,7 @@ To summarize, Vault encrypts most data using the encryption key in the keyring. 
     - Spyware/Malware on the Vault nodes
 
 
-## 2. Roles of Root Key and Encryption Key
+## 3. Roles of Root Key and Encryption Key
 **Root Key**
 It is used to decrypt the Encryption Key
 - Created during Vault initialization or during a rekey operation
@@ -35,12 +35,12 @@ It is use to encryt/decrypt data written to storage backend
 - Can be easily rotated (manual operation)
 
 
-## 3. Seal and Unseal Options
+# 4. Seal and Unseal Options
 - Key Sharding (Shamir)
 - Cloud Auto Unseal
 - Transit Auto Unseal
 
-## Unsealing with Key Shards
+## 4.1 Unsealing with Key Shards
 
 <p>
     <img src="../images/shamir.png">
@@ -68,7 +68,7 @@ vault operator unseal # will request unseal keys
 vault status # will provide the Status of Vault 
 ```
 
-## Unsealing with Cloud Auto Unseal
+## 4.2 Unsealing with Cloud Auto Unseal
 
 <p>
     <img src="../images/cloud_auto_unseal.png">
@@ -94,7 +94,7 @@ vault operator init # will provide **Recovery keys** and initial Root Token
 **Documentation**: [Auto-unseal Vault using AWS KMS](https://developer.hashicorp.com/vault/tutorials/auto-unseal/autounseal-aws-kms)
 
 
-## Unsealing with Transit Auto Unseal
+## 4.3 Unsealing with Transit Auto Unseal
 
 <p>
     <img src="../images/transit_auto_unseal.png">

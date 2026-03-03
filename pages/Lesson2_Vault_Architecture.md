@@ -1,10 +1,5 @@
-# Vault Architecture
+# 1. Vault Components
 
-<p>
-    <img src="../images/vault_component.png">
-</p>
-
-# 1. Vault Components**
 1. Storage Backend
 2. Secret Engine
 3. Authentication Methods
@@ -44,7 +39,7 @@
     - **Prioritizes safety over availability**
 
 
-# **2. Vault Architecture**
+# 2. Vault Architecture
 <p>
     <img src="../images/architecture.png">
 </p>
