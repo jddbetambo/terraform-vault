@@ -1,11 +1,6 @@
 # Vault Seal and Unseal
 
-
-
 ## 1. Data Protection
-<p>
-    <img src="../images/data_protection.png">
-</p>
 
 - Vault encrypts the data using an **Encryption Key** (in the keyring) and stores them in its storage backend. To protect this encryption key, Vault encrypts it using another encryption key known as the **Root Key** and stores it with the data.
 - To decrypt the data, Vault needs the root key so that it can decrypt the encryption key. Unsealing is the process of getting access to this root key. Vault encrypts the root key using the unseal key, and stores it alongside all other Vault data.
@@ -119,4 +114,6 @@ However, this process is manual and can become painful when you have several Vau
     <img src="../images/transit_auto_unseal2.png">
 </p>
 
-**Documentation**: [Auto-unseal Vault using transit secrets engine](https://developer.hashicorp.com/vault/tutorials/auto-unseal/autounseal-transits)
+# Documentation
+
+[Auto-unseal Vault using transit secrets engine](https://developer.hashicorp.com/vault/tutorials/auto-unseal/autounseal-transits)

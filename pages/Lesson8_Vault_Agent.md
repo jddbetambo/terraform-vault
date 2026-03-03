@@ -1,10 +1,6 @@
 # Vault Agent
 
-<p align="center">
-    <img src="../images/vault_agent1.png">
-</p>
-
-# What is Vault Agent?
+# Introduction
 
 Vault Agent aims to remove the initial hurdle to adopt Vault by providing a more scalable and simpler way for applications to integrate with Vault, by providing the ability to render templates containing the secrets required by your application, without requiring changes to your application.
 
@@ -117,9 +113,6 @@ This setup is ideal for legacy apps—they simply read the token from the sink w
 </tr>
 </table>
 
-<p>
-    <img src="../images/vault_agent2.png">
-</p>
 
 # Vault Agent - `Templating`
 

@@ -1,21 +1,21 @@
 # Deploying Integrated Storage Backend
 
-<p align="center">
-    <img src="../images/demo1.png">
-</p>
+Why the ALB is Important in a Vault Architecture
 
-## Why the ALB is Important in a Vault Architecture
-1. Single, stable endpoint for clients 
+**1. Single, stable endpoint for clients** 
+
 - Without an ALB, clients must talk directly to individual Vault nodes
 - That’s fragile. Nodes restart, fail, scale, or get replaced.
 - With an ALB, clients use one endpoint
 - The ALB handles routing to the correct node automatically
 
-2. Health‑aware routing
+**2. Health‑aware routing**
+
 - Vault exposes a health endpoint. The ALB continuously checks this and only sends traffic to nodes that are unsealed, active or standby, healthy
 - This prevents clients from hitting sealed nodes, nodes still joining the cluster, nodes in maintenance, nodes recovering from Raft sync. This is essential for high availability.
 
 **3. TLS termination (optional but common)**
+
 The ALB can terminate TLS using an ACM certificate: 
 - Simplifies certificate management, 
 - Offloads TLS from Vault nodes, 
@@ -23,6 +23,7 @@ The ALB can terminate TLS using an ACM certificate:
 You can still run Vault with TLS internally if you want end‑to‑end encryption.
 
 **4. Load balancing across standby nodes**
+
 Vault’s Raft architecture allows:
 - 1 active node
 - N standby nodes
@@ -30,6 +31,7 @@ Standby nodes can serve read‑only requests (depending on your setup).
 The ALB distributes traffic intelligently, improving performance and reducing load on the active node.
 
 **5. Automatic failover**
+
 If the active node fails:
 - Raft elects a new leader
 - ALB automatically routes traffic to the new active node
@@ -39,6 +41,7 @@ If the active node fails:
 This is a huge operational win.
 
 **6. Security isolation**
+
 The ALB acts as a controlled entry point:
 - Only the ALB can reach port 8200 on Vault nodes
 - Clients never talk directly to EC2 instances
@@ -46,6 +49,7 @@ The ALB acts as a controlled entry point:
 This reduces the attack surface dramatically.
 
 **7. Scalability and future-proofing**
+
 If you add more Vault nodes:
 - Just tag them correctly
 - They auto-join the cluster
@@ -60,6 +64,7 @@ The ALB gives you:
 - Security isolation
 - Operational simplicity
 - A single stable endpoint
+
 **Without an ALB, you lose most of the reliability and manageability that make Vault production-ready.**
 
 

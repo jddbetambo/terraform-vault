@@ -1,9 +1,5 @@
 # Installing Vault
 
-<p align="center">
-    <img src="../images/installing_vault2.png">
-</p>
-
 ## Installing Vault on Linux Ubuntu
 
 1. Go to the following [link](https://releases.hashicorp.com/vault) and see the available vault version for your computer achitecture 
@@ -33,9 +29,8 @@ vault version
 ```
 
 # Running Vault Dev Server
-## Introduction
 
-<p align="center">
+<p>
     <img src="../images/running_dev_server.png">
 </p>
 
@@ -67,11 +62,7 @@ vault status
 </p>
 
 # Running Vault in Prod mode
-## Introduction
 
-<p align="center">
-    <img src="../images/running_prod_server.png">
-</p>
 <p align="center">
     <img src="../images/running_prod_server2.png">
 </p>
@@ -214,7 +205,7 @@ sudo systemctl status vault
 
 # Running Vault using Integrated Storage Backend (Raft)
 
-<p align="center">
+<p>
     <img src="../images/running_internal_backend.png">
 </p>
 
@@ -224,7 +215,7 @@ sudo systemctl status vault
 - All data is replicated among **all nodes** in the cluster
 - ELiminates the need to run a Consul cluster and manage it
 
-[Demo Deploying the Integrated Storage Backend](./demo1_integrated_storage_backend.md)
 
-# What next ?
-[Vault architecture](Lesson2_Vault_Architecture.md) 
+# Documentation
+
+[Demo Deploying the Integrated Storage Backend](./demo1_integrated_storage_backend.md)

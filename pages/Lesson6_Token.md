@@ -241,6 +241,8 @@ VAULT_TOKEN=$(echo $OUTPUT | jq '.auth.client_token' -j)
 echo $VAULT_TOKEN
 ```
 
+# Documentation
+
 [Vault Documentation](https://developer.hashicorp.com/vault/api-docs/auth/token)
 
 [Kode Cloud Tutorial](https://notes.kodekloud.com/docs/HashiCorp-Certified-Vault-Associate-Certification/Assess-Vault-Tokens/Managing-Tokens-using-the-API)

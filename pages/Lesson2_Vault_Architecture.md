@@ -1,11 +1,10 @@
-# **Vault Architecture**
-
-# **1. Vault Components**
+# Vault Architecture
 
 <p>
-    <img src="../images/vault_components.png">
+    <img src="../images/vault_component.png">
 </p>
 
+# 1. Vault Components**
 1. Storage Backend
 2. Secret Engine
 3. Authentication Methods
@@ -169,7 +168,3 @@ stanza2 "option" {
 <p>
     <img src="../images/configuration_file.png">
 </p>
-
-
-# What next ?
-[Vault Seal and Unseal](Lesson3_Seal_Unseal.md) 

@@ -1,9 +1,5 @@
 # Vault Policies
 
-<p align="center">
-    <img src="../images/policy1.png">
-</p>
-
 # 1. Overview on Vault Policies
 
 Everything in Vault is path-based, and policies are no exception. Policies provide a declarative way to grant or forbid access to certain paths and operations in Vault. This section discusses policy workflows and syntaxes.
@@ -36,10 +32,6 @@ The user then uses this Vault token for future operations. If the user performs 
 
 # 3. Managing Vault Policies
 ## 3.1 Vault Policy Commands
-
-<p>
-    <img src="../images/policy3.png">
-</p>
 
 ```bash
 vault policy <command>
@@ -245,7 +237,3 @@ vault read aws/creds/S3-readonly
     - Changing policies
     - Adding secret backends
     - Configuring database configurations
-
-<p>
-    <img src="../images/policy4.png">
-</p>

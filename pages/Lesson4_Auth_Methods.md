@@ -1,9 +1,5 @@
 # Authentication Methods
 
-<p align="center">
-    <img src="../images/auth_method1.png">
-</p>
-
 Authentication in Vault is the process by which user or machine supplied information is verified against an internal or external system. Vault supports multiple auth methods including GitHub, LDAP, AppRole, and more. Each auth method has a specific use case.
 
 Before a client can interact with Vault, it must authenticate against an auth method. Upon authentication, a token is generated. This token is conceptually similar to a session ID on a website. The token may have attached policy, which is mapped at authentication time. This process is described in detail in the policies concepts documentation.
@@ -15,28 +11,17 @@ Having multiple auth methods enables you to use an auth method that makes the mo
 # 1. Configuring Auth Methods
 ## 1.1 Vault Auth configuration using CLI
 
-<p>
-    <img src="../images/auth_method2.png">
-</p>
 
-- enable - enable a new auth method
-- disable - desable a auth method (the name ot he mount we want to disable not the type of the auth method)
-- list - list enabled auth methods 
-- tune - used to modify an auth method
-- help - show information how to use vault auth commande
+```bash
+vault auth <command>
+```
+`<command>` can be:
 
-<p>
-    <img src="../images/auth_method3.png">
-</p>
-<p>
-    <img src="../images/auth_method4.png">
-</p>
-<p>
-    <img src="../images/auth_method5.png">
-</p>
-<p>
-    <img src="../images/auth_method6.png">
-</p>
+- **`enable`** - enable a new auth method
+- **`disable`** - desable a auth method (the name ot he mount we want to disable not the type of the auth method)
+- **`list`** - list enabled auth methods 
+- **`tune`** - used to modify an auth method
+- **`help`** - show information how to use vault auth commande
 
 **Enable an auth method at the default path**
 ```bash
@@ -48,30 +33,30 @@ vault auth enable approle # Enables the auth method approle at the default path
 vault auth enable -path=vault-course approle # Enables the auth method approle at a custom path vault-course
 ```
 
-<p>
-    <img src="../images/auth_method7.png">
-</p>
-
 **Mount name for some Auth Methods:**
 
 **- userpass: users**
 
 Enable an Auth Method userpass on the path jdtech
+
 ```bash
 vault auth enable -path=jdtech -description="Local credentials for Vault" userpass
 ```
 
 Create a user John and assign a password and policies on the auth method jdtech
+
 ```bash
 vault write auth/jdtech/users/john password=vault policies=vault-policy
 ```
 
 List the enabled auth methods on Vault server
+
 ```bash
 vault auth list
 ```
 
 List the users under the path jdtech
+
 ```bash
 vault list auth/jdtech/users
 ```
@@ -84,11 +69,13 @@ vault read auth/jdtech/users/john
 **- approle: role**
 
 Enable an Auth Method approle on the path jdcloud
+
 ```bash
 vault auth enable -path=jdcloud -description="Cloud credentials for Vault" approle
 ```
 
 Create a user Joe and assign a password and policies on the auth method jdcloud
+
 ```bash
 vault write auth/jdcloud/role/joe \
     policies=vault-policy \
@@ -96,16 +83,19 @@ vault write auth/jdcloud/role/joe \
 ```
 
 List the enabled auth methods on Vault server
+
 ```bash
 vault auth list
 ```
 
 List the users under the path jdtech
+
 ```bash
 vault list auth/jdcloud/role
 ```
 
 Read/show the information related to the user john
+
 ```bash
 vault read auth/jdtech/role/joe
 ```
@@ -194,10 +184,6 @@ curl --request POST \
      http://127.0.0.1:8200/v1/auth/approle/login
 ```
 
-<p>
-    <img src="../images/auth_api.png">
-</p>
-
 
 # 2. Vault Authentication
 ## 2.1 Vault Authentication using the CLI
@@ -212,10 +198,6 @@ There are a few ways to autenticate to Vault when using CLI
 **Token Helper**
 
 Caches the token after authentication. Stores the token in a local file so it can be referenced for subsequent requests.
-
-<p>
-    <img src="../images/auth1.png">
-</p>
 
 - **authentication with token using CLI**
 
@@ -392,13 +374,6 @@ curl --request POST \
      https://127.0.0.1:8200/v1/auth/okta/login/john@org-name.com | jq
 ```
 
-## Documentation
-
-- [Auth methods](https://developer.hashicorp.com/vault/docs/auth)
-- [AWS auth method](https://developer.hashicorp.com/vault/docs/auth/aws)
-- [Okta auth method](https://developer.hashicorp.com/vault/docs/auth/okta)
-- [Kubernetes auth method](https://developer.hashicorp.com/vault/docs/auth/kubernetes)
-
 
 # Vault Entities
 
@@ -419,26 +394,19 @@ curl --request POST \
 
 **Scenario 2**
 
-<p>
-    <img src="../images/entities2.png">
-</p>
-
 In this scenario if Julie logs in using LDAP, the token that she gets is bound with finance policies. If she want to gather some information in accounts payable, she needs to log out from Vault from the LDAP and then log in with Github auth method.This is not efficient.
 
 **Scenario 3**
-
-<p>
-    <img src="../images/entities3.png">
-</p>
-<p>
-    <img src="../images/entities4.png">
-</p>
 
 Consolidating Logins under a Single Entity
 
 - An entity can be **manually created** to map multiple entities for a single user to provide more efficient authorization managament
 - Any tokens that are created for the entity **inherit the capabilities** that are granted by alias(es)
 
-## Documentation
+# Documentation
 
-[Vault Identity](https://developer.hashicorp.com/vault/tutorials/auth-methods/identity)
+- [Auth methods](https://developer.hashicorp.com/vault/docs/auth)
+- [AWS auth method](https://developer.hashicorp.com/vault/docs/auth/aws)
+- [Okta auth method](https://developer.hashicorp.com/vault/docs/auth/okta)
+- [Kubernetes auth method](https://developer.hashicorp.com/vault/docs/auth/kubernetes)
+- [Vault Identity](https://developer.hashicorp.com/vault/tutorials/auth-methods/identity)

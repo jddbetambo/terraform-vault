@@ -1,9 +1,5 @@
 # Vault Secret Engine
 
-<p>
-    <img src="../images/secret1.png">
-</p>
-
 Secrets engines are components which store, generate, or encrypt data. Secrets engines are incredibly flexible, so it is easiest to think about them in terms of their function. Secrets engines are provided some set of data, they take some action on that data, and they return a result.
 
 Some secrets engines simply store and read data - like encrypted Redis/Memcached. Other secrets engines connect to other services and generate dynamic credentials on demand. Other secrets engines provide encryption as a service, totp generation, certificates, and much more.
@@ -36,10 +32,6 @@ Some example where dynamic secrets are used:
 
 **1. Application wants to Reading/Wirte data in a the Database Server**
 
-<p>
-    <img src="../images/secret2.png">
-</p>
-
 - the application launches
 - The application connects to Vault and obtains et token
 - The applications reads/get the Secrets (credentials) to connect to the database
@@ -48,9 +40,6 @@ Some example where dynamic secrets are used:
 - The application can request a new token or renew the token
 
 **2. CI/CD Pipeline deployment**
-<p>
-    <img src="../images/secret3.png">
-</p>
 
 - A code is deployed and committed from a git repo and tested
 - The pipeline connects to Vault to request a token
@@ -115,11 +104,11 @@ vault secrets <commands>
 
 `<command>` can be:
 
-- `disable` - Disable a secret engine
-- `enable` - Enable a secret engine
-- `list` - List enabled secrets engines
-- `move` - Move a secrets engine to a new path
-- `tune` - Tune a secrets engine configuration
+- **`disable`** - Disable a secret engine
+- **`enable`** - Enable a secret engine
+- **`list`** - List enabled secrets engines
+- **`move`** - Move a secrets engine to a new path
+- **`tune`** - Tune a secrets engine configuration
 
 **Example**
 
@@ -160,16 +149,13 @@ Roles in AWS:
 - List EC2
 - Create RDS
 
-<p>
-    <img src="../images/secret4.png">
-</p>
-
 Organizations usually have Multiple AWS accounts. What we need to do it's create a role based on the permissions we need inside of each those accounts. 
 - Create a policy for the permission
 - Create a Role and attach the policy to the role
 - Attach the policy to the user or group, or attach the role to an instance or apps
 
 ## 4.1 Configure Vault Access to AWS 
+
 ### 4.1.1 Configure Vault Access to AWS using IAM Role credential type
 
 **a. Enabling the AWS Secret Engine** 
@@ -340,7 +326,7 @@ vault write database/roles/mysql-role \
 vault read database/creds/mysql-role
 ```
 
-# 4.3 Cleaning
+## 4.3 Cleaning
 
 - For only one user created
 
@@ -387,10 +373,6 @@ When you run Vault in **-dev server** mode, Vault enables a KV v2 secrest engine
 - To support versioning, KV v2 adds metatdata to our Key Value entries
 - Used to determine creation date, the version of the secret, etc
 
-<p>
-    <img src="../images/secret5.png">
-</p>
-
 Introduces 02 prefixes that must be accounted for when referencing secrets and/or metadata
 
 - **cloud/data** - data where the actual K/V data is stored
@@ -401,10 +383,6 @@ Introduces 02 prefixes that must be accounted for when referencing secrets and/o
 
 **Versioning in KV v2**
 
-<p>
-    <img src="../images/secret6.png">
-</p>
-
 - You create the first time the secret, this is the first version of the secret (v1)
 - When you do update the secret, a new version of the secret is created (v2), but v1 still exists
 - When you delete the v2, you are still on v2 but Vault will provide you empty data
@@ -412,11 +390,9 @@ Introduces 02 prefixes that must be accounted for when referencing secrets and/o
 - Instead of rollback, to do undelete, Vault will not create a new version but keep the last one 
 - When you do destroy, the version remain but the data are completed erased but we can still write in the path
 
-# 6. Working with KV Secrets Engine
+# 6. Managing KV Secrets Engine
 
-## 6.1 Managing KV Secrets Engine
-
-### Using Command Line (CLI)
+## 6.1 Using Command Line (CLI)
 
 ```bash
 vault kv <commands>
@@ -433,7 +409,7 @@ vault kv <commands>
 - `patch` - Add a specific key in the KV (only for KV v2)
 - `rollback` - Recover old data in the KV (only for KV v2)
 
-**KV Version 1**
+### 6.1.1 KV Version 1
 
 ```bash
 vault secrets enable -path=kv1 -version=1 kv
@@ -443,7 +419,7 @@ vault secrets enable -path=kv1 -version=1 kv
 vault kv <commands> kv1/<key_path>
 ```
 
-**KV Version 2**
+### 6.1.2 KV Version 2
 
 ```bash
 vault secrets enable -path=kv2 -version=2 kv
@@ -453,9 +429,9 @@ vault secrets enable -path=kv2 -version=2 kv
 vault kv <commands> kv2/<key_path>
 ```
 
-### Using API
+## 6.2 Using API
 
-**KV Version 1**
+### 6.2.1 KV Version 1**
 
 ```bash
 curl \
@@ -463,7 +439,7 @@ curl \
     https://127.0.0.1:8200/v1/secret/config
 ```
 
-**KV Version 2**
+### 6.2.2 KV Version 2
 
 Note that **data/** or **metadata/** must be used here.
 
@@ -533,7 +509,7 @@ Cubbyhole Secret Engine is used to store arbitrary secrets
 
 ## 7.1 Writing and Reading Data to Cubbyhole 
 
-### Using CLI
+### 7.1.1 Using CLI
 
 ```bash
 vault write cubbyhole/training certification=associate
@@ -543,7 +519,7 @@ vault write cubbyhole/training certification=associate
 vault read cubbyhole/training 
 ```
 
-### Using API
+### 7.1.2 Using API
 
 ```bash
 curl \
@@ -639,7 +615,7 @@ vault secrets enable transit
 
 By default, the secrets engine will mount at the name of the engine. To enable the secrets engine at a different path, use the **-path** argument.
 
-### 1. Create a named encryption key:
+### 2. Create a named encryption key:
 
 ```bash
 vault write -f transit/keys/my-key # Using default key type
@@ -649,7 +625,7 @@ vault write -f transit/keys/my-key # Using default key type
 vault write -f transit/keys/my-key_rsa type="rsa-4096" # Using a custom key 
 ```
 
-### 2. Encrypt some plaintext data using the `/encrypt` endpoint with a named key
+### 3. Encrypt some plaintext data using the `/encrypt` endpoint with a named key
 
 ```bash
 vault write transit/encrypt/my-key plaintext=$(echo "my secret data" | base64)
@@ -669,7 +645,7 @@ The returned ciphertext starts with `vault:v1:`. The first prefix (**vault**) id
 
 Note that Vault does not store any of this data. The caller is responsible for storing the encrypted ciphertext. When the caller wants the plaintext, it must provide the ciphertext back to Vault to decrypt the value.
 
-### 3. Decrypt a piece of data using the `/decrypt` endpoint with a named key
+### 4. Decrypt a piece of data using the `/decrypt` endpoint with a named key
 
 ```bash
 vault write transit/decrypt/my-key ciphertext=vault:v1:8SDd3WHDOjf7mq69CyCqYjBXAiQQAVZRkFM13ok481zoCmHnSeDX9vyf7w==
@@ -691,7 +667,7 @@ It is also possible to script this decryption using some clever shell scripting 
 vault write -field=plaintext transit/decrypt/my-key ciphertext=... | base64 --decode
 ```
 
-### 4. Rotate the underlying encryption key. 
+### 5. Rotate the underlying encryption key. 
 
 This will generate a new encryption key and add it to the keyring for the named key:
 
@@ -701,7 +677,7 @@ vault write -f transit/keys/my-key/rotate
 
 Future encryptions will use this new key. Old data can still be decrypted due to the use of a key ring.
 
-### 5. Upgrade already-encrypted data to a new key. 
+### 6. Upgrade already-encrypted data to a new key. 
 
 Vault will decrypt the value using the appropriate key in the keyring and then encrypt the resulting plaintext with the newest key in the keyring.
 
@@ -942,6 +918,8 @@ vault policy write policy-webapp-pki webapp-policy.hcl
 ```
 
 Note: In production, you would most likely attach this policy to your webapp's authentication role to give it the authorization to generate certificates (among other permissions it might need).
+
+# Documentation
 
 [Documentation on Vault PKI](https://github.com/btkrausen/vault-codespaces/blob/main/labs/lab_pki_secrets_engine.md)
 
