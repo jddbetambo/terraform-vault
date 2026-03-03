@@ -67,7 +67,7 @@ variable "InstanceType" {
 variable "instance_names" {
   description = "List of EC2 instance names for Env"
   type        = list(string)
-  default     = ["Node-1", "Node-2", "Node-3", "Node-4"]
+  default     = ["Node-1"] #["Node-1", "Node-2", "Node-3", "Node-4"]
 }
 
 variable "EC2_iam_role" {

@@ -275,7 +275,7 @@ vault write aws-cloud/roles/vault_user \
 Now you can create new credentials using the below command
 
 ```bash
-vault read aws/creds/vault_user
+vault read aws-cloud/creds/vault_user
 ```
 
 Each invocation of the command will generate a new credential.
@@ -945,5 +945,4 @@ Note: In production, you would most likely attach this policy to your webapp's a
 
 [Documentation on Vault PKI](https://github.com/btkrausen/vault-codespaces/blob/main/labs/lab_pki_secrets_engine.md)
 
-# TOTP Secret Engine
 

@@ -42,7 +42,7 @@ The user then uses this Vault token for future operations. If the user performs 
 </p>
 
 ```bash
-vault auth policy <command>
+vault policy <command>
 ```
 `<command>` can be:
 
@@ -50,7 +50,11 @@ vault auth policy <command>
 - `fmt`: Formats a policy on disk
 - `list` : Lists the installed policies
 - `read`: Prints the contents of a policy
-- `write`: Uploads a named policy from a file
+- `write`: Uploads (create) a named policy from a file
+
+```bash
+vault policy write <policy_name> <policy_filename.hcl>
+```
 
 ## 3.2 Policy Capabilities
 

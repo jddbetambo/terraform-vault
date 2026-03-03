@@ -11,7 +11,7 @@ mkdir -p /etc/vault.d /opt/vault/data
 chown -R vault:vault /etc/vault.d /opt/vault
 
 # Install Vault
-VAULT_VERSION="1.21.0"
+VAULT_VERSION="1.21.3"
 curl -sSLo /tmp/vault.zip "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip"
 unzip /tmp/vault.zip -d /usr/local/bin
 chmod +x /usr/local/bin/vault
