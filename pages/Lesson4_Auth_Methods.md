@@ -410,3 +410,5 @@ Consolidating Logins under a Single Entity
 - [Okta auth method](https://developer.hashicorp.com/vault/docs/auth/okta)
 - [Kubernetes auth method](https://developer.hashicorp.com/vault/docs/auth/kubernetes)
 - [Vault Identity](https://developer.hashicorp.com/vault/tutorials/auth-methods/identity)
+- [How to Configure Vault Authentication Methods](https://oneuptime.com/blog/post/2026-02-02-vault-auth-methods/view)
+- [A Guide to securing your applications secrets with vault authentication](https://medium.com/@timzowen/a-guide-to-securing-your-applications-secrets-with-vault-authentication-4d23bc2a55ab)
