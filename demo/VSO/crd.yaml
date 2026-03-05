@@ -1,0 +1,46 @@
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: my-static-secret
+  namespace: web-app-ns
+spec:
+  vaultAuthRef: vault-auth
+  mount: kv
+  path: secret/data/my-static-secret
+  type: kv-v2
+  destination:
+    create: true
+    name: my-k8-secret
+  refreshafter: 1h
+
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultDynamicSecret
+metadata:
+  name: my-dynamic-secret
+  namespace: ecommerce-app-ns
+spec:
+  vaultAuthRef: vault-auth
+  mount: database
+  path: creds/my-db-role
+  destination:
+    create: true
+    name: my-dynamic-db-secret
+  refreshafter: 30m
+  fields:
+    username: db-username
+    password: db-password
+
+
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultPKISecret
+metadata:
+  name: my-pki-certificate
+spec:
+  vaultAuthRef: vault-auth
+  mount: pki
+  role: my-pki-role
+  commonName: myapp.example.com
+  destination:
+    create: true
+    name: my-pki-secret
+  ttl: 24h

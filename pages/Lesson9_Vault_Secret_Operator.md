@@ -104,93 +104,85 @@ Works with a sidecar pattern, modifying your pod spec to inject a Vault Agent co
 </tbody>
 </table>
 
-# Vault Secrets Operator - Install
+# Vault Secret - `Custom Resource Definition`
 
-**Challenge**
-Vault offers a complete solution for secrets lifecycle management, but that requires developers and operators to learn a new tool. Instead, developers want a cloud native way to access the secrets through Kubernetes and have no need to understand Vault in great depth. Vault Secrets Operator (VSO) updates Kubernetes native secrets. The user accesses Kubernetes native secrets managed on the back end by HashiCorp Vault.
+The Vault Secrets Custom Resource Definition (CRD) is a crucial component for managing secrets within Kubernetes environments. It allows for the creation and management of Kubernetes secrets from HashiCorp Vault, ensuring that secrets are securely stored and accessible within the cluster. 
 
-**Solution**
-- A Kubernetes operator is a software extension that uses custom resources to manage applications hosted on Kubernetes.
-- The Vault Secrets Operator is a Kubernetes operator that syncs secrets between Vault and Kubernetes natively without requiring the users to learn details of Vault use.
-- The Vault secrets operator supports kv-v1 and kv-v2, TLS certificates in PKI and full range of static and dynamic secrets.
+The Vault Secrets Operator (VSO) is a key player in this process, as it synchronizes Vault secrets with Kubernetes Secrets, providing a seamless integration between the two systems. The VSO supports various features, including automatic secret drift and remediation, secret rotation for specific Kubernetes resource types, and the ability to transform secret data as needed. This integration simplifies the management of secrets for applications running on Kubernetes, ensuring that they can access the necessary data without the need for manual intervention.
 
-### Prerequisite
+In order to sync secrets and Kubernetes, the Vault Secrets Operator uses the Custom resource Deinition (CRD). They are going to describe what kind of secrets you want and where to get them in Vault.
 
-- Docker
-- Helm CLI
-- k9s
-- Kubernetes command-line interface (CLI)
-- minikube
-- Recent version of the Vault binary installed. Refer to the Vault install guide, and confirm you are using a version that supports VSO: please see Supported Vault versions.
+There are 03 main types of CRDs used to sync your secrets
 
-### 1. Start minikube
+1. **Vault Static Secret** 
 
-Minikube allows you to run a miniature Kubernetes cluster on your local machine.
-
-Create a minikube cluster.
-
-``` bash
-minikube start
-```
-
-### 2. Install Vault cluster
-
-Using Helm install Vault on a local instance of minikube. In Kubernetes, install Vault on it's own virtual cluster called a namespace.
-
-If you have not already, add the HashiCorp repository.
+This CRD defines how the operator syncs a single static secret (KV Secret engine) from Vault to Kubernetes Secret.
 
 ```bash
-$ helm repo add hashicorp https://helm.releases.hashicorp.com
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: my-static-secret
+  namespace: web-app-ns
+spec:
+  vaultAuthRef: vault-auth
+  mount: kv
+  path: secret/data/my-static-secret
+  type: kv-v2
+  destination:
+    create: true
+    name: my-k8-secret
+  refreshafter: 1h
 ```
 
-Update to the latest version of the HashiCorp Helm charts, update the repository.
+2. **Vault Dynamc Secret**
+
+This CRD syncs a dynmic Vault secret (Database Secret Engine) generated On demand to a Kubernetes Secret.
 
 ```bash
-$ helm repo update
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "hashicorp" chart repository
-...Successfully got an update from the "open" chart repository
-...Successfully got an update from the "bitnami" chart repository
-Update Complete. ⎈Happy Helming!⎈
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultDynamicSecret
+metadata:
+  name: my-dynamic-secret
+  namespace: ecommerce-app-ns
+spec:
+  vaultAuthRef: vault-auth
+  mount: database
+  path: creds/my-db-role
+  destination:
+    create: true
+    name: my-dynamic-db-secret
+  refreshafter: 30m
+  fields:
+    username: db-username
+    password: db-password
 ```
-Details of the output might differ, the important thing is the Update Complete message.
 
-Determine the latest version of Vault.
+3. **Vault KPI Secret**
 
-$ helm search repo hashicorp/vault
-NAME                                    CHART VERSION   APP VERSION     DESCRIPTION
-hashicorp/vault                         0.28.1          1.17.2          Official HashiCorp Vault Chart
-hashicorp/vault-secrets-operator        0.7.1           0.8.0           Official Vault Secrets Operator Chart
+This CRD configures the operator to generate a certificate using the PKI Secret Engine and sync it to a Kubernetes Secret.
 
-Vault Secrets Operator supports the latest three versions of Vault. Please see Supported Vault versions for details.
+```bash
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultPKISecret
+metadata:
+  name: my-pki-certificate
+spec:
+  vaultAuthRef: vault-auth
+  mount: pki
+  role: my-pki-role
+  commonName: myapp.example.com
+  destination:
+    create: true
+    name: my-pki-secret
+  ttl: 24h
+```
 
-Using the YAML file in the appropriate sub-folder, install Vault on your minikube cluster
+# Vault Secret Operator - Features
 
-
-Vault Community
-
-Vault Enterprise
-$ helm install vault hashicorp/vault -n vault --create-namespace --values vault/vault-values.yaml
-
-The output should resemble the following:
-
-NAME: vault
-LAST DEPLOYED: Fri Mar 31 09:37:42 2023
-NAMESPACE: vault
-STATUS: deployed
-REVISION: 1
-NOTES:
-Thank you for installing HashiCorp Vault!
-
-Now that you have deployed Vault, you should look over the docs on using
-Vault with Kubernetes available here:
-
-https://www.vaultproject.io/docs/
-
-Your release is named vault. To learn more about the release, try:
-$ helm status vault
-$ helm get manifest vault
-Wait until the Vault pods are Ready 1/1 and status is Running.
+- **`Instant updates`**: Secrets update automatically when they change in Vault, no rstart required. This enables to stay in sync with real-time updates triggered by changes in Vault.
+- **`Encrypted Client Cache`**: Secrets are stored securely in-memory with encryption. This reduces API calls and speeds up access while keeping data protected.
+- **`Secret Transformation`**: Customize how secrets are formatted before reaching Kubernetes. This enables to rename keys; filter values or reschape data to match app needs.
 
 # Documentation
 
