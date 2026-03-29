@@ -12,11 +12,11 @@
 - Not all storage backends are created equal
     - Some support high availability 
     - Others have better tools for management and data protection (dynamoDB, S3 bucket)
-- There is **only one** storage backend per Vault Cluster. So if you have 6 clusters in your envoronment, then you will have 6 different storage backend
+- **There is only one storage backend per Vault Cluster**. So if you have 6 clusters, you will have 6 different storage backend.
 
 ## 1.2 Secret Engine
 - Responsible for managing secrets for organization
-- Secrets Engines can **store**, **generate** or **encrypt** data. Thos are the 3 fonctions of Secret Engines.
+- Secrets Engines can **store**, **generate** or **encrypt** data. Those are the 3 fonctions of Secret Engines.
 - Many secrets engines connect to other platforms to generate dynamic credentials on demand
 - Multiple secrets engines can be enabled and used as needed, even multiple secrets engines of the same type as longer the pathname is different.
 - Secret engines are enables and isolated at a **path**. All interactions are done directly with the path itself.
@@ -24,11 +24,12 @@
 ## 1.3 Authentication Methods
 - Performs **authentication** and manage **identities**
 - Responsible for assigning identity and policies to a user
-- Multiple authentication methods can be enbaled depending on your use case. Auth methods can be differentiated by **human vs system** methods
+- Multiple authentication methods can be enbaled depending on your use case. 
+- Auth methods can be differentiated by **human vs system** methods
 - Once authenticated, Vault will **issue a client token** used to make all subsequent Vault request (read.write)
     - The **fundamental goal** of all auth methods is to obtain a token
-    - Each token jas an associated **policy (or policies)** and a **TTL**
-- Dafault authentication method for a new Vault deployment = **tokens**
+    - Each token has an associated **policy (or policies)** and a **TTL**
+- Default authentication method for a new Vault deployment = **tokens**
 
 ## 1.4 Audit Devices
 - Keeps detailed log of all **requests** and **responses** to Vault
@@ -53,8 +54,8 @@
 - The path **prefix** tells Vault which component a request should be routed
 - Secret engines, auth methods and audit devices are mounted at a specified path, often referred to as a **mount**.
 - Paths available are dependant on the features enabled in Vault, such as Auth Methods and Secrets Engines
-- System backend is a default backend in Vault xhixh is mounted at the /sys endpoint.
-- Vault components can be enabled at **ANY** path you'd like using the **-path** flag. Each component does have a **default path **you can use as well
+- System backend is a default backend in Vault which is mounted at the **/sys endpoint**.
+- Vault components can be enabled at **ANY** path you'd like using the **-path** flag. Each component does have a **default path** you can use as well
 - Vault has a few System Reserved Path which you cannot use or remove:
     - **auth/**: Endpoint for auth method configuration
     - **cubbyhole/**: Endpoint used by the Cubbyhole secrets engine
@@ -102,11 +103,11 @@ The differnt audit devices are shown in the table below.
 - Only need to initialize a Vault cluster **one time** via a single node
 - Vault initialization is when Vault **creates the Root Key and Key shares**
 - Options to define 
-    - thresholds, 
-    - key shares, 
-    - recovery keys, 
-    - and encryption
-- Vault initialization is also where the initial Root Token is generated and retirned to the user
+    - **thresholds**, 
+    - **key shares**, 
+    - **recovery keys**, 
+    - **and encryption**
+- Vault initialization is also where the **initial Root Token** is generated and returned to the user
 - Vault can be initialized via CLI, API or UI
 
 ```bash
@@ -127,14 +128,14 @@ vault server -config /etc/vault.d/vault.hcl
 ```
 
 - what(s configured in the file)
-    - Storage backend; where is the storage backend (Raft, Consul, DynamoDB etc) ?
-    - Listener(s) and Port: what interfaces and port ?
-    - TLS certificate: what certificate and paths ?
-    - Seal Type and Config: which seal type (Cloud auto unseal, transit auto unseal) ? 
-    - CLuster Name: identifier for the cluster
-    - Log Level: specifies the log level to use (Trace, Debug, Error, Warn, Info)
-    - UI: enables the built-in web UI
-    - Cluster IP and Port: address to advertise to other Vault servers for request forwarding
+    - **Storage backend**: where is the storage backend (Raft, Consul, DynamoDB etc) ?
+    - **Listener(s) and Ports**: what interfaces and port ?
+    - **TLS certificate**: what certificate and paths ?
+    - **Seal Type and Config**: which seal type (Cloud auto unseal, transit auto unseal) ? 
+    - **Cluster Name**: identifier for the cluster
+    - **Log Level**: specifies the log level to use (Trace, Debug, Error, Warn, Info)
+    - **UI**: enables the built-in web UI
+    - **Cluster IP and Port**: address to advertise to other Vault servers for request forwarding
 
 - How a configuration file looks like
 ```bash
@@ -155,10 +156,10 @@ stanza2 "option" {
 ```
 
 - Available Stanzas
-    - seal - seal type
-    - listener - addresses.ports for Vault
-    - storage - storage backend configuration
-    - telemetry - where to publish metrics to upstream systems
+    - **seal** - seal type
+    - **listener** - addresses.ports for Vault
+    - **storage** - storage backend configuration
+    - **telemetry** - where to publish metrics to upstream systems
 
 <p>
     <img src="../images/configuration_file.png">
