@@ -218,3 +218,8 @@ sudo systemctl status vault
 # Documentation
 
 [Demo Deploying the Integrated Storage Backend](./demo1_integrated_storage_backend.md)
+
+
+# Next
+
+[Lesson 2: Vault Architecture](Lesson2_Vault_Architecture.md)

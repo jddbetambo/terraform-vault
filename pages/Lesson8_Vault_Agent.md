@@ -277,3 +277,8 @@ The credentials will now be rendered into the specified destination file (e.g., 
 
 # Documentation
 [How to Use Vault Agent for Auto-Auth](https://oneuptime.com/blog/post/2026-02-02-vault-agent/view)
+
+
+# Next
+
+[Lesson 9: Vault Secret Operator](Lesson9_Vault_Secret_Operator.md)

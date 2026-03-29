@@ -63,43 +63,36 @@ Works with a sidecar pattern, modifying your pod spec to inject a Vault Agent co
 <td><b>Secret delivery</b></td>
 <td><span style="font-weight: 400;">Sidecar volume</span></td>
 <td><span style="font-weight: 400;">Kubernetes Secret</span></td>
-<td></td>
 </tr>
 <tr>
 <td><b>Dynamic secrets support</b></td>
 <td><span style="font-weight: 400;">✅ Yes</span></td>
 <td><span style="font-weight: 400;">❌ No (manual rotation)</span></td>
-<td></td>
 </tr>
 <tr>
 <td><b>Lease management</b></td>
 <td><span style="font-weight: 400;">✅ Automatic</span></td>
 <td><span style="font-weight: 400;">❌ No</span></td>
-<td></td>
 </tr>
 <tr>
 <td><b>GitOps-compatibility</b></td>
 <td><span style="font-weight: 400;">⚠️ Limited (via annotations)</span></td>
 <td><span style="font-weight: 400;">✅ Full (via CRDs)</span></td>
-<td></td>
 </tr>
 <tr>
 <td><b>Use of native K8s secrets</b></td>
 <td><span style="font-weight: 400;">❌ No</span></td>
 <td><span style="font-weight: 400;">✅ Yes</span></td>
-<td></td>
 </tr>
 <tr>
 <td><b>Dependency on Vault at pod startup</b></td>
 <td><span style="font-weight: 400;">✅ Yes</span></td>
 <td><span style="font-weight: 400;">❌ No</span></td>
-<td></td>
 </tr>
 <tr>
 <td><b>Best application</b></td>
 <td><span style="font-weight: 400;">Dynamic credentials</span></td>
 <td><span style="font-weight: 400;">Static configuration</span></td>
-<td></td>
 </tr>
 </tbody>
 </table>
@@ -189,3 +182,8 @@ spec:
 - [Vault Agent Injector vs Secrets Operators](https://www.flowfactor.be/blogs/vault-agent-injector-vs-secrets-operator-kubernetes-comparison/)
 - [Vault Agent Injector vs Secrets Operator](https://krausen.io/blog/vault-agent-injector-vs-vault-secrets-operator/)
 - [Manage Kubernetes native secrets with the Vault Secrets Operator](https://developer.hashicorp.com/vault/tutorials/kubernetes-introduction/vault-secrets-operator)
+
+
+# Next
+
+[Lesson 10: Vault Replication](Lesson10_Vault_Replication.md)

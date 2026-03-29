@@ -924,3 +924,6 @@ Note: In production, you would most likely attach this policy to your webapp's a
 [Documentation on Vault PKI](https://github.com/btkrausen/vault-codespaces/blob/main/labs/lab_pki_secrets_engine.md)
 
 
+# Next
+
+[Lesson 8: Vault Agent](Lesson8_Vault_Agent.md)

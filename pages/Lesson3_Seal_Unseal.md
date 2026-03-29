@@ -117,3 +117,8 @@ However, this process is manual and can become painful when you have several Vau
 # Documentation
 
 [Auto-unseal Vault using transit secrets engine](https://developer.hashicorp.com/vault/tutorials/auto-unseal/autounseal-transits)
+
+
+# Next
+
+[Lesson 4: Authentication Methods](Lesson4_Auth_Methods.md)

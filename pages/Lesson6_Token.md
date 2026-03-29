@@ -244,3 +244,8 @@ echo $VAULT_TOKEN
 [Vault Documentation](https://developer.hashicorp.com/vault/api-docs/auth/token)
 
 [Kode Cloud Tutorial](https://notes.kodekloud.com/docs/HashiCorp-Certified-Vault-Associate-Certification/Assess-Vault-Tokens/Managing-Tokens-using-the-API)
+
+
+# Next
+
+[Lesson 7: Vault Secret Engine](Lesson7_Secret_Engine.md)

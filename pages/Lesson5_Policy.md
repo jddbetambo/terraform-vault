@@ -235,3 +235,8 @@ vault read aws/creds/S3-readonly
     - Changing policies
     - Adding secret backends
     - Configuring database configurations
+
+
+# Next
+
+[Lesson 6: Vault Token](Lesson6_Token.md)
