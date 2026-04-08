@@ -15,21 +15,8 @@ Everything in Vault is path-based, and policies are no exception. Policies provi
     - You **can** change but it cannot be deleted
     - Attached to all non-root tokens by default (can be removed if needed)
 
-# 2. Policy-authorization workflow
-
-<p>
-    <img src="../images/policy2.png">
-</p>
-
-1. A user attempts to authenticate to Vault using their LDAP credentials, providing Vault with their LDAP username and password.
-2. Vault establishes a connection to LDAP and asks the LDAP server to verify the given credentials. Assuming this is successful, the LDAP server returns the information about the user, including the OU groups.
-3. Vault maps the result from the LDAP server to policies inside Vault using the mapping configured by the security team in the previous section. Vault then generates a token and attaches the matching policies.
-4. Vault returns the token to the user. This token has the correct policies assigned, as dictated by the mapping configuration that was setup by the security team in advance.
-
-The user then uses this Vault token for future operations. If the user performs the authentication steps again, they will get a **new token**. The token will have the same permissions, but the **actual token will be different**. Authenticating a second time does not invalidate the original token.
-
-# 3. Managing Vault Policies
-## 3.1 Vault Policy Commands
+# 2. Managing Vault Policies
+## 2.1 Vault Policy Commands
 
 ```bash
 vault policy <command>
@@ -53,10 +40,7 @@ vault policy read <policy_name>
 ```bash
 # Lists the installed policies
 vault policy list 
-```
-or
-```bash
-vault read sys/policy 
+vault read sys/policy
 ```
 ```bash
 # Formats a policy on disk
@@ -67,7 +51,7 @@ vault policy fmt <policy_filename.hcl>
 vault policy delete <policy_name> 
 ```
 
-## 3.2 Policy Capabilities
+## 2.2 Policy Capabilities
 
 Each path must define one or more capabilities which provide fine-grained control over permitted (or denied) operations. 
 
@@ -88,7 +72,7 @@ Each path must define one or more capabilities which provide fine-grained contro
 - `recover` - Allows recovering the data on the given path from a snapshot
 
 
-## 3.3 Anatomy of a Vault policy
+## 2.3 Anatomy of a Vault policy
 
 Policies are written in HCL or JSON and describe which paths in Vault a user or machine is allowed to access.
 
@@ -123,7 +107,7 @@ path "secret/super-secret" {
 }
 ```
 
-## 3.4 Customizing the path
+## 2.4 Customizing the path
 
 Policies use path-based matching to test the set of capabilities against a request. A policy path may specify an exact path to match, or it could specify a **glob** pattern which instructs Vault to use a prefix match:
 
@@ -163,7 +147,7 @@ path "secret/+/+/teamb" {
 
 Vault's architecture is similar to a filesystem. Every action in Vault has a corresponding path and capability - even Vault's internal core configuration endpoints live under the "sys/" path. Policies define access to these paths and capabilities, which controls a token's access to credentials in Vault.
 
-## 3.5 Policy with Parameters
+## 2.5 Policy with Parameters
 
 Vault policies control which paths and operations a principal (token/role) may perform. They do not directly validate arbitrary parameter names or values inside secret payloads — that validation is usually implemented by the secrets engine (roles, templates, or external checks) or by using Sentinel/OIDC/Enterprise features. However, you can use policies to allow or deny specific API endpoints and restrict which parameters can be set indirectly by restricting paths and capabilities. 
 
@@ -274,7 +258,7 @@ path "kv/data/app/*" {
 }
 ```
 
-## 3.6 Templated policies
+## 2.6 Templated policies
 
 The policy syntax allows for doing variable replacement in some policy strings with values available to the token. Currently **identity** information can be injected, and currently the **path** keys in policies allow injection.
 
@@ -336,9 +320,9 @@ When developing templated policies, use IDs wherever possible. Each ID is unique
 [Source: Vault Policies Docs](https://developer.hashicorp.com/vault/docs/concepts/policies)
 
 
-# 4. Default policy vs Root Policy
+# 3. Default policy vs Root Policy
 
-## 4.1 Default Policy
+## 3.1 Default Policy
 
 The default policy is a built-in Vault policy that cannot be removed. By default, it is attached to all tokens, but may be explicitly excluded at token creation time by supporting authentication methods.
 
@@ -364,7 +348,7 @@ $ curl \
   https://vault.hashicorp.rocks/v1/auth/token/create
 ```
 
-## 4.2 Root policy
+## 3.2 Root policy
 
 The root policy is a built-in Vault policy that cannot be modified or removed. Any user associated with this policy becomes a root user. A root user can do anything within Vault. As such, it is highly recommended that you revoke any root tokens before running Vault in production.
 
@@ -386,11 +370,11 @@ curl \
   https://vault.hashicorp.rocks/v1/auth/token/revoke
 ```
 
-# 5. Managing policies
+# 4. Managing policies
 
 Policies are authored (written) in your editor of choice. They can be authored in HCL or JSON, and the syntax is described in detail above. Once saved, policies must be uploaded to Vault before they can be used.
 
-# 5.1 Listing policies
+# 4.1 Listing policies
 To list all registered policies in Vault:
 
 ```bash
@@ -405,7 +389,7 @@ curl \
   https://vault.hashicorp.rocks/v1/sys/policy
 ```
 
-## 5.2 Creating policies
+## 4.2 Creating policies
 
 Policies may be created (uploaded) via the CLI or via the API. To create a new policy in Vault:
 
@@ -423,7 +407,7 @@ curl \
   https://vault.hashicorp.rocks/v1/sys/policy/policy-name
 ```
 
-## 5.3 Updating policies
+## 4.3 Updating policies
 
 Existing policies may be updated to change permissions via the CLI or via the API. To update an existing policy in Vault, follow the same steps as creating a policy, but use an existing policy name:
 
@@ -441,7 +425,7 @@ curl \
   https://vault.hashicorp.rocks/v1/sys/policy/my-existing-policy
 ```
 
-## 5.4 Deleting policies
+## 4.4 Deleting policies
 
 Existing policies may be deleted via the CLI or API. To delete a policy:
 
@@ -458,7 +442,7 @@ curl \
   https://vault.hashicorp.rocks/v1/sys/policy/policy-name
 ```
 
-# 5.5 Associating policies
+# 4.5 Associating policies
 
 Vault can automatically associate a set of policies to a token based on an authorization. This configuration varies significantly between authentication backends. For simplicity, this example will use Vault's built-in userpass auth method.
 
@@ -479,7 +463,7 @@ Password (will be hidden): ...
 ```
 If the provided information is correct, Vault will generate a token, assign the list of configured policies to the token, and return that token to the authenticated user.
 
-# 5.6 Example of some admin policies
+# 4.6 Example of some admin policies
 
 ```bash
 # Read system health check
@@ -544,7 +528,7 @@ path "sys/mounts"
 EOF
 ```
 
-# 6. Testing Policies
+# 5. Testing Policies
 
 ## Part 1: Creating Your First Policy
 
@@ -694,7 +678,7 @@ vault kv put secret/app/other-app/config api_key="test123"
 vault kv put secret/test-3 password="newpass"
 ```
 
-# 7. Administrative Policies
+# 6. Administrative Policies
 
 - Permissions for Vault backend functions live at the **sys/** path
 - Users/admins will need policies that define what they can do within Vault to administer Vault itself
