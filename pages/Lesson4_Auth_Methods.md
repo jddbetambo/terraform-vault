@@ -9,7 +9,8 @@ Auth methods are the components in Vault that perform authentication and are res
 Having multiple auth methods enables you to use an auth method that makes the most sense for your use case of Vault and your organization.
 
 # 1. Configuring Auth Methods
-## 1.1 Vault Auth configuration using CLI
+
+## 1.1 Vault Auth Methods using CLI
 
 
 ```bash
@@ -23,58 +24,63 @@ vault auth <command>
 - **`tune`** - used to modify an auth method
 - **`help`** - show information how to use vault auth commande
 
-**Enable an auth method at the default path**
 ```bash
-vault auth enable approle # Enables the auth method approle at the default path
+# Enables the auth method approle at the default path
+vault auth enable approle 
+```
+```bash
+# Enables the auth method approle at a custom path vault-course
+vault auth enable -path=vault-course approle 
+```
+```bash
+# List enabled auth methods
+vault auth list 
+```
+```bash
+# Disables the auth method approle at a custom path vault-course
+vault auth disable vault-course 
 ```
 
-**Enable an auth method at a custom path**
-```bash
-vault auth enable -path=vault-course approle # Enables the auth method approle at a custom path vault-course
-```
+### Userpass Auth Method using CLI
 
-**Mount name for some Auth Methods:**
-
-**- userpass: users**
-
-Enable an Auth Method userpass on the path jdtech
+**1. Enable an Auth Method userpass on the path jdtech**
 
 ```bash
 vault auth enable -path=jdtech -description="Local credentials for Vault" userpass
 ```
 
-Create a user John and assign a password and policies on the auth method jdtech
+**2. Create a user John and assign a password and policies on the auth method jdtech**
 
 ```bash
 vault write auth/jdtech/users/john password=vault policies=vault-policy
 ```
 
-List the enabled auth methods on Vault server
+**3. List the enabled auth methods on Vault server**
 
 ```bash
 vault auth list
 ```
 
-List the users under the path jdtech
+**4. List the users under the path jdtech**
 
 ```bash
 vault list auth/jdtech/users
 ```
 
-Read/show the information related to the user john
+**5. Read/show the information related to the user john**
 ```bash
 vault read auth/jdtech/users/john
 ```
 
-**- approle: role**
+### Approle Auth Method using CLI
 
-Enable an Auth Method approle on the path jdcloud
+**1. Enable an Auth Method approle on the path jdcloud**
 
 ```bash
 vault auth enable -path=jdcloud -description="Cloud credentials for Vault" approle
 ```
 
-Create a user Joe and assign a password and policies on the auth method jdcloud
+**2. Create a user Joe and assign a password and policies on the auth method jdcloud**
 
 ```bash
 vault write auth/jdcloud/role/joe \
@@ -82,19 +88,19 @@ vault write auth/jdcloud/role/joe \
     token_ttl=20m
 ```
 
-List the enabled auth methods on Vault server
+**3. List the enabled auth methods on Vault server**
 
 ```bash
 vault auth list
 ```
 
-List the users under the path jdtech
+**4. List the users under the path jdtech**
 
 ```bash
 vault list auth/jdcloud/role
 ```
 
-Read/show the information related to the user john
+**5. Read/show the information related to the user john**
 
 ```bash
 vault read auth/jdtech/role/joe
@@ -102,9 +108,9 @@ vault read auth/jdtech/role/joe
 
 ## 1.2 Vault Auth configuration using API
 
-**1. Enable the AppRole Auth Method**
+### Enable the AppRole Auth Method using API
 
-- Create an `auth.json` file:
+- **Create an `auth.json` file:**
 
 ```bash
 {
@@ -112,7 +118,7 @@ vault read auth/jdtech/role/joe
 }
 ```
 
-- Use `curl` to enable AppRole:
+- **Use `curl` to enable AppRole:**
 
 ```bash
 curl --header "X-Vault-Token: $VAULT_TOKEN" \
@@ -121,7 +127,7 @@ curl --header "X-Vault-Token: $VAULT_TOKEN" \
      http://127.0.0.1:8200/v1/sys/auth/approle
 ```
 
-- Verify the mount:
+- **Verify the mount:**
 
 ```bash
 vault auth list
@@ -129,9 +135,9 @@ vault auth list
 
 You should see an entry for `approle/`.
 
-**2. Create an AppRole with Policies**
+### Create an AppRole with Policies
 
-- Define which policies this AppRole will use `policies.json`:
+- **Define which policies this AppRole will use `policies.json`:**
 
 ```bash
 {
@@ -139,7 +145,7 @@ You should see an entry for `approle/`.
 }
 ```
 
-- Create the AppRole named `vaultcourse`:
+- **Create the AppRole named `vaultcourse`:**
 
 ```bash
 curl --header "X-Vault-Token: $VAULT_TOKEN" \
@@ -150,20 +156,20 @@ curl --header "X-Vault-Token: $VAULT_TOKEN" \
 
 A successful response confirms the role is created.
 
-**3. Fetch the Role ID**
+### Fetch the Role ID
 
-Each AppRole has a unique `Role ID`. Retrieve it:
+**Each AppRole has a unique `Role ID`. Retrieve it:**
 
 ```bash
 curl --header "X-Vault-Token: $VAULT_TOKEN" \
      http://127.0.0.1:8200/v1/auth/approle/role/vaultcourse/role-id | jq
 ```
 
-Inspect `data.role_id` in the JSON response.
+**Inspect `data.role_id` in the JSON response.**
 
-**4. Generate a Secret ID**
+## Generate a Secret ID
 
-Generate the `Secret ID` needed alongside the `Role ID`:
+**Generate the `Secret ID` needed alongside the `Role ID`:**
 
 ```bash
 curl --header "X-Vault-Token: $VAULT_TOKEN" \
@@ -176,7 +182,7 @@ The response returns:
 - `data.secret_id`
 - `data.secret_id_accessor`
 
-With these credentials, you can log in:
+**With these credentials, you can log in:**
 
 ```bash
 curl --request POST \
@@ -186,48 +192,44 @@ curl --request POST \
 
 
 # 2. Vault Authentication
+
 ## 2.1 Vault Authentication using the CLI
 
 There are a few ways to autenticate to Vault when using CLI
 
-**1. Use the vault login command**
-
-- Authenticate using a token or another auth method
-- Make use of a CLI token helper
+### Use the vault login command when using CLI
 
 **Token Helper**
 
 Caches the token after authentication. Stores the token in a local file so it can be referenced for subsequent requests.
 
-- **authentication with token using CLI**
-
 ```bash
 vault login <User-Token> # By default, Vault login uses a token auth method
 ```
 
-- **authentication with userpass auth method using CLI**
+**authentication with userpass auth method using CLI**
 
 ```bash
 vault login -method=userpass username=john # Used to obtain a token
 ```
 
-- **authentication with approle auth method using CLI**
+**authentication with approle auth method using CLI**
 
 When the **approle** auth method is already enabled and the role **john** is already created.
 
-Get the `role-id`
+- **Get the `role-id`**
 
 ```bash
 vault read auth/approle/role/john/role-id
 ```
 
-Create the `secret-id`
+- **Create the `secret-id`**
 
 ```bash
 vault write -force auth/approle/role/john/secret-id
 ```
 
-Create a login authentication
+- **Create a login authentication**
 
 ```bash
 vault write auth/approle/login \
@@ -235,37 +237,37 @@ vault write auth/approle/login \
     secret_id=<secret-id>
 ```
 
-- **authentication with okta auth method using CLI**
+**authentication with okta auth method using CLI**
 
-    - Connect to the okta platform and create a token
-    - Enable okta auth method in Vault
+- **Connect to the okta platform and create a token**
+- **Enable okta auth method in Vault**
 
-    ```bash
-    vault auth enable okta
-    ```
+```bash
+vault auth enable okta
+```
 
-    - Create the configuration for okta auth
+- **Create the configuration for okta auth**
 
-    ```bash
-    vault write auth/okta/config \
-        base_url = "okta.com"
-        org_name = "<org-name>"
-        api_token = "<token-created>"
-    ```
+```bash
+vault write auth/okta/config \
+    base_url = "okta.com"
+    org_name = "<org-name>"
+    api_token = "<token-created>"
+```
 
-    - Create an okta user
+- **Create an okta user**
 
-    ```bash
-    vault write auth/okta/users/john@org-name.com policies=org-name-policies
-    ```
+```bash
+vault write auth/okta/users/john@org-name.com policies=org-name-policies
+```
 
-    - User authentication 
+- **User authentication**
 
-    ```bash
-    vault login -method=okta username=john@org-name.com
-    ```
+```bash
+vault login -method=okta username=john@org-name.com
+```
 
-**2. Use the VAULT_TOKEN Environment Variable**
+### Use the VAULT_TOKEN Environment Variable
 
 - Used if you already have a **token**
 - Parsing the JSON Response to obtain the Vault Token
@@ -375,7 +377,7 @@ curl --request POST \
 ```
 
 
-# Vault Entities
+# 3. Vault Entities
 
 - An **Entity** is a representation of a single person or system used to log into Vault. Each has a unique value. Each **entity** is made up of zero or more **aliases**.
 - **Alias** is a combinaison of the aut method plus some identification. It is a mapping between an **entity** and **auth method(s)**
