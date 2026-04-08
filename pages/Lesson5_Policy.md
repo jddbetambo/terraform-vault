@@ -43,26 +43,47 @@ vault policy <command>
 - `write`: Uploads (create) a named policy from a file
 
 ```bash
+# Create a policy based on a file
 vault policy write <policy_name> <policy_filename.hcl>
+```
+```bash
+# Prints the contents of a policy
+vault policy read <policy_name> 
+```
+```bash
+# Lists the installed policies
+vault policy list 
+```
+or
+```bash
+vault read sys/policy 
+```
+```bash
+# Formats a policy on disk
+vault policy fmt <policy_filename.hcl> 
+```
+```bash
+# Delete a policy
+vault policy delete <policy_name> 
 ```
 
 ## 3.2 Policy Capabilities
 
-Each path must define one or more capabilities which provide fine-grained control over permitted (or denied) operations. Capabilities are always **specified as a list of strings**, even if there is only one capability. To determine the capabilities needed to perform a specific operation, the **-output-policy** flag can be added to the CLI subcommand. 
+Each path must define one or more capabilities which provide fine-grained control over permitted (or denied) operations. 
 
 **The list of capabilities include the following with the associated HTTP verbs in parenthesis :**
 
-- `create` (`POST/PUT`) - Allows creating data at the given path. Very few parts of Vault distinguish between create and update, so most operations require both **create** and **update** capabilities. Parts of Vault that provide such a distinction are noted in documentation.
+- `create` (`POST/PUT`) - Allows creating data at the given path. 
 - `read` (`GET`) - Allows reading the data at the given path.
-- `update` (`POST/PUT`) - Allows changing the data at the given path. In most parts of Vault, this implicitly includes the ability to create the initial value at the path.
+- `update` (`POST/PUT`) - Allows changing the data at the given path. 
 - `patch` (`PATCH`) - Allows partial updates to the data at a given path.
 - `delete` (`DELETE`) - Allows deleting the data at the given path.
-- `list` (`LIST`) - Allows listing values at the given path. Note that the keys returned by a list operation are not filtered by policies. Do not encode sensitive information in key names. Not all backends support listing.
+- `list` (`LIST`) - Allows listing values at the given path. 
 
 **In addition to the standard set, there are some capabilities that do not map to HTTP verbs.**
 
-- `sudo` - Allows access to paths that are root-protected. Tokens are not permitted to interact with these paths unless they have the sudo capability (in addition to the other necessary capabilities for performing an operation against that path, such as read or delete). For example, modifying the audit log backends requires a token with sudo privileges.
-- `deny` - Disallows access. This always takes precedence regardless of any other defined capabilities, including sudo.
+- `sudo` - Allows access to paths that are root-protected. 
+- `deny` - Disallows access, including sudo privilige.
 - `subscribe` - Allows subscribing to events for the given path.
 - `recover` - Allows recovering the data on the given path from a snapshot
 
@@ -113,7 +134,7 @@ path "secret/foo" {
   capabilities = ["read"]
 }
 
-# Permit reading everything under "secret/bar". an attached token could read
+# Permit reading everything under "secret/bar". An attached token could read
 # "secret/bar/zip", "secret/bar/zip/zap", but not "secret/bars/zip".
 path "secret/bar/*" {
   capabilities = ["read"]
@@ -280,7 +301,250 @@ The policy syntax allows for doing variable replacement in some policy strings w
 </tr>
 </table>
 
+**Examples**
+
+The following policy creates a section of the KVv2 Secret Engine to a specific user
+
+```bash
+path "secret/data/{{identity.entity.id}}/*" {
+  capabilities = ["create", "update", "patch", "read", "delete"]
+}
+
+path "secret/metadata/{{identity.entity.id}}/*" {
+  capabilities = ["list"]
+}
+```
+
+If you wanted to create a shared section of KV that is associated with entities that are in a group.
+
+# In the example below, the group ID maps a group and the path
+
+```bash
+path "secret/data/groups/{{identity.groups.ids.fb036ebc-2f62-4124-9503-42aa7A869741.name}}/*" {
+  capabilities = ["create", "update", "patch", "read", "delete"]
+}
+
+path "secret/metadata/groups/{{identity.groups.ids.fb036ebc-2f62-4124-9503-42aa7A869741.name}}/*" {
+  capabilities = ["list"]
+}
+```
+
+**Note**: 
+
+When developing templated policies, use IDs wherever possible. Each ID is unique to the user, whereas names can change over time and can be reused. This ensures that if a given user or group name is changed, the policy will be mapped to the intended entity or group.
+
 [Source: Vault Policies Docs](https://developer.hashicorp.com/vault/docs/concepts/policies)
+
+
+# 4. Default policy vs Root Policy
+
+## 4.1 Default Policy
+
+The default policy is a built-in Vault policy that cannot be removed. By default, it is attached to all tokens, but may be explicitly excluded at token creation time by supporting authentication methods.
+
+- To view all permissions granted by the default policy on your Vault installation, run:
+
+```bash
+vault read sys/policy/default
+```
+
+- To disable attachment of the default policy:
+
+```bash
+vault token create -no-default-policy
+```
+
+or via the API:
+
+```bash
+$ curl \
+  --request POST \
+  --header "X-Vault-Token: ..." \
+  --data '{"no_default_policy": "true"}' \
+  https://vault.hashicorp.rocks/v1/auth/token/create
+```
+
+## 4.2 Root policy
+
+The root policy is a built-in Vault policy that cannot be modified or removed. Any user associated with this policy becomes a root user. A root user can do anything within Vault. As such, it is highly recommended that you revoke any root tokens before running Vault in production.
+
+When a Vault server is first initialized, there always exists one root user. This user is used to do the initial configuration and setup of Vault. After configured, the initial root token should be revoked and more strictly controlled users and authentication should be used.
+
+- To revoke a root token, run:
+
+```bash
+vault token revoke "<token>"
+```
+
+or via the API:
+
+```bash
+curl \
+  --request POST \
+  --header "X-Vault-Token: ..." \
+  --data '{"token": "<token>"}' \
+  https://vault.hashicorp.rocks/v1/auth/token/revoke
+```
+
+# 5. Managing policies
+
+Policies are authored (written) in your editor of choice. They can be authored in HCL or JSON, and the syntax is described in detail above. Once saved, policies must be uploaded to Vault before they can be used.
+
+# 5.1 Listing policies
+To list all registered policies in Vault:
+
+```bash
+vault read sys/policy
+```
+
+or via the API:
+
+```bash
+curl \
+  --header "X-Vault-Token: ..." \
+  https://vault.hashicorp.rocks/v1/sys/policy
+```
+
+## 5.2 Creating policies
+
+Policies may be created (uploaded) via the CLI or via the API. To create a new policy in Vault:
+
+```bash
+vault policy write policy-name policy-file.hcl
+```
+
+or via the API:
+
+```bash
+curl \
+  --request POST \
+  --header "X-Vault-Token: ..." \
+  --data '{"policy":"path \"...\" {...} "}' \
+  https://vault.hashicorp.rocks/v1/sys/policy/policy-name
+```
+
+## 5.3 Updating policies
+
+Existing policies may be updated to change permissions via the CLI or via the API. To update an existing policy in Vault, follow the same steps as creating a policy, but use an existing policy name:
+
+```bash
+vault write sys/policy/my-existing-policy policy=@updated-policy.json
+```
+
+or via the API:
+
+```bash
+curl \
+  --request POST \
+  --header "X-Vault-Token: ..." \
+  --data '{"policy":"path \"...\" {...} "}' \
+  https://vault.hashicorp.rocks/v1/sys/policy/my-existing-policy
+```
+
+## 5.4 Deleting policies
+
+Existing policies may be deleted via the CLI or API. To delete a policy:
+
+```bash
+vault delete sys/policy/policy-name
+```
+
+or via the API:
+
+```bash
+curl \
+  --request DELETE \
+  --header "X-Vault-Token: ..." \
+  https://vault.hashicorp.rocks/v1/sys/policy/policy-name
+```
+
+# 5.5 Associating policies
+
+Vault can automatically associate a set of policies to a token based on an authorization. This configuration varies significantly between authentication backends. For simplicity, this example will use Vault's built-in userpass auth method.
+
+A Vault administrator or someone from the security team would create the user in Vault with a list of associated policies:
+
+```bash
+vault write auth/userpass/users/sethvargo \
+    password="s3cr3t!" \
+    policies="dev-readonly,logs"
+```
+This creates an authentication mapping to the policy such that, when the user authenticates successfully to Vault, they will be given a token which has the list of policies attached.
+
+The user wishing to authenticate would run
+
+```bash
+vault login -method="userpass" username="sethvargo"
+Password (will be hidden): ...
+```
+If the provided information is correct, Vault will generate a token, assign the list of configured policies to the token, and return that token to the authenticated user.
+
+# 5.6 Example of some admin policies
+
+```bash
+# Read system health check
+path "sys/health"
+{
+  capabilities = ["read", "sudo"]
+}
+
+# Create and manage ACL policies broadly across Vault
+
+# List existing policies
+path "sys/policies/acl"
+{
+  capabilities = ["list"]
+}
+
+# Create and manage ACL policies
+path "sys/policies/acl/*"
+{
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+# Enable and manage authentication methods broadly across Vault
+
+# Manage auth methods broadly across Vault
+path "auth/*"
+{
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+# Create, update, and delete auth methods
+path "sys/auth/*"
+{
+  capabilities = ["create", "update", "delete", "sudo"]
+}
+
+# List auth methods
+path "sys/auth"
+{
+  capabilities = ["read"]
+}
+
+# Enable and manage the key/value secrets engine at `secret/` path
+
+# List, create, update, and delete key/value secrets
+path "secret/*"
+{
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+# Manage secrets engines
+path "sys/mounts/*"
+{
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+# List existing secrets engines.
+path "sys/mounts"
+{
+  capabilities = ["read"]
+}
+EOF
+```
+
+[Documentation](https://developer.hashicorp.com/vault/tutorials/policies/policies)
 
 # 4. Testing Policies
 
@@ -290,41 +554,152 @@ Test to make sure the policy fulfills the requirements
 - Clients must be able to request AWS credentials granting read access to an S3 bucket
 - Read secrest from secret/apikey/Google
 
+## 4.1 Part 1: Creating Your First Policy
 
-1. Create a new token with policy **web-app** attached
+**1. Create a new file called readonly-policy.hcl**
 
 ```bash
-vault token create -policy="web-app"
+# Allow read-only access to secrets in the 'secret' path
+path "secret/data/*" {
+  capabilities = ["read", "list"]
+}
+
+path "secret/metadata/*" {
+  capabilities = ["list"]
+} 
 ```
 
-2. List the policies attached to the newly generated token **<token>**
+**2. Write this policy to Vault**
 
 ```bash
-vault token lookup <token>
+vault policy write readonly-policy readonly-policy.hcl
 ```
 
-3. Authenticate with the newly generated token
+**3. Verify the policy was created**
 
 ```bash
-vault login <token>
+vault policy list
 ```
 
-4. Make sure that the token can read (Should succeed)
-
 ```bash
-vault read secret/apikey/Google
+vault policy read readonly-policy
 ```
 
-5. This should fail
+## 4.2 Part 2: Testing Policy Restrictions
+
+**1. Create some test secrets**
 
 ```bash
-vault wrtite secret/apikey/Google key="123456"
+# Create two test secrets
+vault kv put secret/test-1 password="secret123"
+vault kv put secret/test-2 api_key="abc123"
 ```
 
-6. Request a new AWS Credentials (Should succeed)
+**2. Create a token with the readonly policy**
 
 ```bash
-vault read aws/creds/S3-readonly
+vault token create -policy=readonly-policy
+```
+
+**3. Login with the new generated token in another terminal**
+
+```bash
+vault token login <token>
+```
+
+**4. Test the policy restrictions**
+
+- **These should work**
+
+```bash
+vault kv get secret/test-1
+vault kv list secret/
+```
+
+- **These should not work**
+
+```bash
+vault kv put secret/test-3 password="newpass"
+vault kv delete secret/test-1
+```
+
+## 4.3 Part 3: Creating a More Complex Policy with Entity Templating
+
+**1. Create the Policy**
+
+Create a file called app-policy.hcl with the following contents:
+
+```bash
+# Allow management of app-specific secrets
+path "secret/data/app/{{identity.entity.name}}/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+# Allow listing of secret mount
+path "secret/metadata/*" {
+  capabilities = ["list"]
+}
+```
+
+**2. Then, write the policy**
+
+```bash
+vault policy write app-policy app-policy.hcl
+```
+
+**3. Enable and Configure the Userpass Auth Method**
+
+```bash
+vault auth enable userpass
+```
+
+**4. Get the Userpass Accessor and set to a variable**
+
+```bash
+USERPASS_ACCESSOR=$(vault auth list -format=json | jq -r '."userpass/".accessor')
+```
+
+**5. Create an entity used to map the user to the policy**
+
+```bash
+vault write identity/entity name="app1" policies="app-policy"
+```
+
+Note the entity ID in the output.
+
+**6. Create the Entity Alias for the Userpass user**
+
+```bash
+vault write identity/entity-alias \
+    name="app1" \
+    mount_accessor="$USERPASS_ACCESSOR" \
+    canonical_id="<add_entity_id_here>"
+```
+
+Use the entity ID from the previous step in this command.
+
+**7. Create the Userpass User**
+
+```bash
+vault write auth/userpass/users/app1 \
+    password="password123"
+```
+
+**8. Test Login and Permissions using the Templated Policy**
+
+```bash
+# Login as the user
+vault login -method=userpass \
+    username=app1 \
+    password=password123
+
+# These should succeed
+vault kv put secret/app/app1/config api_key="test123"
+vault kv get secret/app/app1/config
+
+# These should fail with 403
+vault kv put secret/app/other-app/config api_key="test123"
+vault kv put secret/test-3 password="newpass"
 ```
 
 # 5. Administrative Policies
