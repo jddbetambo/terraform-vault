@@ -100,17 +100,6 @@ path "secret/*" {
 path "secret/super-secret" {
   capabilities = ["deny"]
 }
-
-# Policies can also specify allowed, disallowed, and required parameters. here
-# the key "secret/restricted" can only contain "foo" (any value) and "bar" (one
-# of "zip" or "zap").
-path "secret/restricted" {
-  capabilities = ["create"]
-  allowed_parameters = {
-    "foo" = []
-    "bar" = ["zip", "zap"]
-  }
-}
 ```
 
 ## 3.4 Customizing the path
@@ -153,7 +142,118 @@ path "secret/+/+/teamb" {
 
 Vault's architecture is similar to a filesystem. Every action in Vault has a corresponding path and capability - even Vault's internal core configuration endpoints live under the "sys/" path. Policies define access to these paths and capabilities, which controls a token's access to credentials in Vault.
 
-## 3.5 Templated policies
+## 3.5 Policy with Parameters
+
+Vault policies control which paths and operations a principal (token/role) may perform. They do not directly validate arbitrary parameter names or values inside secret payloads — that validation is usually implemented by the secrets engine (roles, templates, or external checks) or by using Sentinel/OIDC/Enterprise features. However, you can use policies to allow or deny specific API endpoints and restrict which parameters can be set indirectly by restricting paths and capabilities. 
+
+### Policy with Allowed Parameters
+
+- This policy allows a client to generate AWS credentials only for specific IAM roles. - The caller may only request credentials for the two listed IAM roles. Any other **role_arn** is rejected.
+
+
+```bash
+path "aws/creds/*" {
+  capabilities = ["read"]
+
+  allowed_parameters = {
+    "role_arn" = [
+      "arn:aws:iam::123456789012:role/app-readonly",
+      "arn:aws:iam::123456789012:role/app-admin"
+    ]
+  }
+}
+```
+
+- In this policy, the key "secret/restricted" can only contain "foo" (any value) and "bar" (one of "zip" or "zap").
+
+```bash
+path "secret/restricted" {
+  capabilities = ["create"]
+  
+  allowed_parameters = {
+    "foo" = []
+    "bar" = ["zip", "zap"]
+  }
+}
+```
+
+### Policy with Disallowed Parameters
+
+This policy prevents users from requesting long-lived credentials by blocking certain TTL values. - The caller cannot request TTLs of 1h, 2h, or 24h. Any other TTL is allowed (unless restricted elsewhere).
+
+```bash
+path "aws/creds/*" {
+  capabilities = ["read"]
+
+  disallowed_parameters = {
+    "ttl" = ["1h", "2h", "24h"]
+  }
+}
+```
+
+### Policy with Required Parameters
+
+This policy forces the caller to include a specific parameter when generating credentials. The caller must include username_prefix="app-" in the request. If the parameter is missing or different, Vault rejects the request.
+
+```bash
+path "database/creds/app-role" {
+  capabilities = ["read"]
+
+  required_parameters = {
+    "username_prefix" = ["app-"]
+  }
+}
+```
+
+### Combined Example (Allowed + Required + Disallowed)
+
+Here’s a more advanced policy that uses all three. This is a very realistic PKI policy used in production.
+
+- **Allowed**: TTL must be 1h, 2h, or 4h; key type must be RSA or EC
+- **Required**: common_name must be provided
+- **Disallowed**: wildcard SANs for internal domains are forbidden
+
+``` bash
+path "pki/issue/app-cert" {
+  capabilities = ["create", "update"]
+
+  allowed_parameters = {
+    "ttl" = ["1h", "2h", "4h"]
+    "key_type" = ["rsa", "ec"]
+  }
+
+  required_parameters = {
+    "common_name" = []
+  }
+
+  disallowed_parameters = {
+    "alt_names" = ["*.internal.local"]
+  }
+}
+```
+
+### KV Example (simple but useful)
+
+Even KV v2 can use parameter restrictions:
+
+- Must include a data object
+- Cannot use CAS writes
+
+``` bash
+path "kv/data/app/*" {
+  capabilities = ["create", "update"]
+
+  required_parameters = {
+    "data" = []
+  }
+
+  disallowed_parameters = {
+    "options" = ["cas"]
+  }
+}
+```
+
+## 3.6 Templated policies
 
 The policy syntax allows for doing variable replacement in some policy strings with values available to the token. Currently **identity** information can be injected, and currently the **path** keys in policies allow injection.
 
