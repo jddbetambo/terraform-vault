@@ -84,7 +84,7 @@ path "secret/foo" {
   capabilities = ["read"]
 }
 ```
-When this policy is assigned to a token, the token can read from "secret/foo". However, the token cannot update or delete "secret/foo", since the capabilities do not allow it. Because policies are **deny by default**, the token would have no other access in Vault.
+When this policy is assigned to a token, the token can read from "secret/foo". However, the token cannot update or delete "secret/foo", since the capabilities do not allow it. Because policies are <span style="color:red">**deny by default**</span>, the token would have no other access in Vault.
 
 Here is a more detailed policy, and it is documented inline:
 
@@ -126,7 +126,7 @@ path "secret/zip-*" {
 }
 ```
 
-In addition, a **+** can be used to denote any number of characters bounded within a single path segment (this appeared in Vault 1.1):
+In addition, a <span style="color:red">**+**</span> can be used to denote any number of characters bounded within a single path segment (this appeared in Vault 1.1):
 
 ```bash
 # Permit reading the "teamb" path under any top-level path under secret/
@@ -169,7 +169,7 @@ path "aws/creds/*" {
 ```bash
 path "secret/restricted" {
   capabilities = ["create"]
-  
+
   allowed_parameters = {
     "foo" = []
     "bar" = ["zip", "zap"]
