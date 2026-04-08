@@ -317,7 +317,7 @@ path "secret/metadata/{{identity.entity.id}}/*" {
 
 If you wanted to create a shared section of KV that is associated with entities that are in a group.
 
-# In the example below, the group ID maps a group and the path
+**In the example below, the group ID maps a group and the path**
 
 ```bash
 path "secret/data/groups/{{identity.groups.ids.fb036ebc-2f62-4124-9503-42aa7A869741.name}}/*" {
@@ -342,13 +342,13 @@ When developing templated policies, use IDs wherever possible. Each ID is unique
 
 The default policy is a built-in Vault policy that cannot be removed. By default, it is attached to all tokens, but may be explicitly excluded at token creation time by supporting authentication methods.
 
-- To view all permissions granted by the default policy on your Vault installation, run:
+- **To view all permissions granted by the default policy on your Vault installation**
 
 ```bash
 vault read sys/policy/default
 ```
 
-- To disable attachment of the default policy:
+- **To disable attachment of the default policy**
 
 ```bash
 vault token create -no-default-policy
@@ -370,7 +370,7 @@ The root policy is a built-in Vault policy that cannot be modified or removed. A
 
 When a Vault server is first initialized, there always exists one root user. This user is used to do the initial configuration and setup of Vault. After configured, the initial root token should be revoked and more strictly controlled users and authentication should be used.
 
-- To revoke a root token, run:
+- **To revoke a root token**
 
 ```bash
 vault token revoke "<token>"
@@ -544,17 +544,9 @@ path "sys/mounts"
 EOF
 ```
 
-[Documentation](https://developer.hashicorp.com/vault/tutorials/policies/policies)
+# 6. Testing Policies
 
-# 4. Testing Policies
-
-Test to make sure the policy fulfills the requirements
-
-**Example**:
-- Clients must be able to request AWS credentials granting read access to an S3 bucket
-- Read secrest from secret/apikey/Google
-
-## 4.1 Part 1: Creating Your First Policy
+## Part 1: Creating Your First Policy
 
 **1. Create a new file called readonly-policy.hcl**
 
@@ -585,7 +577,7 @@ vault policy list
 vault policy read readonly-policy
 ```
 
-## 4.2 Part 2: Testing Policy Restrictions
+## Part 2: Testing Policy Restrictions
 
 **1. Create some test secrets**
 
@@ -623,7 +615,7 @@ vault kv put secret/test-3 password="newpass"
 vault kv delete secret/test-1
 ```
 
-## 4.3 Part 3: Creating a More Complex Policy with Entity Templating
+## Part 3: Creating a More Complex Policy with Entity Templating
 
 **1. Create the Policy**
 
@@ -702,7 +694,7 @@ vault kv put secret/app/other-app/config api_key="test123"
 vault kv put secret/test-3 password="newpass"
 ```
 
-# 5. Administrative Policies
+# 7. Administrative Policies
 
 - Permissions for Vault backend functions live at the **sys/** path
 - Users/admins will need policies that define what they can do within Vault to administer Vault itself
