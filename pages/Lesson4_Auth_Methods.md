@@ -9,7 +9,7 @@ Auth methods are the components in Vault that perform authentication and are res
 Having multiple auth methods enables you to use an auth method that makes the most sense for your use case of Vault and your organization.
 
 
-# 1.Vault Auth Methods enabling using CLI
+# 1.Vault Auth Methods using CLI
 
 ## 1.1 Configuring Auth Methods using CLI
 
@@ -138,7 +138,7 @@ vault write auth/jdcloud/login \
     secret_id=<secret-id>
 ```
 
-# 2. Vault Auth configuration using API
+# 2. Vault Auth Methods using API
 
 ## 2.1 Userpass Auth Method using API
 
