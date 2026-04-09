@@ -44,8 +44,6 @@ vault auth disable <aut-method|vault-course>
 
 ## 1.2 Userpass Auth Method using CLI
 
-### 1.2.1 Enabling Userpass Auth Method using CLI
-
 **1. Enable an Auth Method userpass on the path jdtech**
 
 ```bash
@@ -75,7 +73,7 @@ vault list auth/jdtech/users
 vault read auth/jdtech/users/john
 ```
 
-### 1.2.2 Authentication with Userpass Auth Method using CLI
+**6. Authentication with Userpass Auth Method using CLI**
 
 ```bash
 # Used to obtain a token
@@ -83,8 +81,6 @@ vault login -method=userpass username=john
 ```
 
 ## 1.3 Enabling Approle Auth Method using CLI
-
-### 1.3.1 Enabling Approle Auth Method using CLI
 
 **1. Enable an Auth Method approle on the path jdcloud**
 
@@ -120,23 +116,21 @@ vault list auth/jdcloud/role
 vault read auth/jdcloud/role/myrole
 ```
 
-### 1.3.2 Authentication with Approle Auth Method using CLI**
+**6. Get the `role-id`**
 
 When the **approle** auth method is already enabled and the role **john** is already created.
-
-**1. Get the `role-id`**
 
 ```bash
 vault read auth/jdcloud/role/myrole/role-id
 ```
 
-**2. Create the `secret-id`**
+**7. Create the `secret-id`**
 
 ```bash
 vault write -force auth/jdcloud/role/myrole/secret-id
 ```
 
-**3. Create a login authentication**
+**8. Create a login authentication**
 
 ```bash
 vault write auth/jdcloud/login \
@@ -146,7 +140,7 @@ vault write auth/jdcloud/login \
 
 # 2. Vault Auth configuration using API
 
-## 2.2 Userpass Auth Method using API
+## 2.1 Userpass Auth Method using API
 
 **0. Set these environment variables first (example)**
 
@@ -340,7 +334,7 @@ path "sys/mounts/*/tune" {
 }
 ```
 
-# 2.3 AppRole Auth Method using API
+# 2.2 AppRole Auth Method using API
 
 - **Create an `auth.json` file:**
 
