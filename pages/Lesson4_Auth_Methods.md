@@ -8,10 +8,10 @@ Auth methods are the components in Vault that perform authentication and are res
 
 Having multiple auth methods enables you to use an auth method that makes the most sense for your use case of Vault and your organization.
 
-# 1. Configuring Auth Methods
 
-## 1.1 Vault Auth Methods using CLI
+# 1.Vault Auth Methods enabling using CLI
 
+## 1.1 Configuring Auth Methods using CLI
 
 ```bash
 vault auth <command>
@@ -26,22 +26,25 @@ vault auth <command>
 
 ```bash
 # Enables the auth method approle at the default path
-vault auth enable approle 
+vault auth enable <auth-method> 
 ```
 ```bash
 # Enables the auth method approle at a custom path vault-course
-vault auth enable -path=vault-course approle 
+vault auth enable -path=vault-course <auth-method> 
 ```
 ```bash
 # List enabled auth methods
 vault auth list 
+vault read sys/auth
 ```
 ```bash
 # Disables the auth method approle at a custom path vault-course
-vault auth disable vault-course 
+vault auth disable <aut-method|vault-course>  
 ```
 
-### Userpass Auth Method using CLI
+## 1.2 Userpass Auth Method using CLI
+
+### 1.2.1 Enabling Userpass Auth Method using CLI
 
 **1. Enable an Auth Method userpass on the path jdtech**
 
@@ -72,43 +75,272 @@ vault list auth/jdtech/users
 vault read auth/jdtech/users/john
 ```
 
-### Approle Auth Method using CLI
+### 1.2.2 Authentication with Userpass Auth Method using CLI
+
+```bash
+# Used to obtain a token
+vault login -method=userpass username=john 
+```
+
+## 1.3 Enabling Approle Auth Method using CLI
+
+### 1.3.1 Enabling Approle Auth Method using CLI
 
 **1. Enable an Auth Method approle on the path jdcloud**
 
 ```bash
-vault auth enable -path=jdcloud -description="Cloud credentials for Vault" approle
+vault auth enable -path=jdcloud -description="Roles for Vault" approle
 ```
 
-**2. Create a user Joe and assign a password and policies on the auth method jdcloud**
+**2. Create a role myrole**
+
+- Creating a role without a policy
 
 ```bash
-vault write auth/jdcloud/role/joe \
-    policies=vault-policy \
+vault write -f auth/jdcloud/role/myrole 
+```
+
+- Creating a role with a policy
+
+```bash
+vault write auth/jdcloud/role/myrole \
+    policies=test-policy \
     token_ttl=20m
 ```
 
-**3. List the enabled auth methods on Vault server**
-
-```bash
-vault auth list
-```
-
-**4. List the users under the path jdtech**
+**4. List the roles under the path jdcloud**
 
 ```bash
 vault list auth/jdcloud/role
 ```
 
-**5. Read/show the information related to the user john**
+**5. Read/show the information related to the role myrole**
 
 ```bash
-vault read auth/jdtech/role/joe
+vault read auth/jdcloud/role/myrole
 ```
 
-## 1.2 Vault Auth configuration using API
+### 1.3.2 Authentication with Approle Auth Method using CLI**
 
-### Enable the AppRole Auth Method using API
+When the **approle** auth method is already enabled and the role **john** is already created.
+
+**1. Get the `role-id`**
+
+```bash
+vault read auth/jdcloud/role/myrole/role-id
+```
+
+**2. Create the `secret-id`**
+
+```bash
+vault write -force auth/jdcloud/role/myrole/secret-id
+```
+
+**3. Create a login authentication**
+
+```bash
+vault write auth/jdcloud/login \
+    role_id=<role-id> \
+    secret_id=<secret-id>
+```
+
+# 2. Vault Auth configuration using API
+
+## 2.2 Userpass Auth Method using API
+
+**0. Set these environment variables first (example)**
+
+```bash
+export VAULT_ADDR="http://127.0.0.1:8200"
+export VAULT_TOKEN="s.your_admin_token"
+```
+
+**1. Enable the userpass auth method**
+
+Enable mount at auth/userpass (path can be different if you choose):
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request POST \
+     --data '{"type":"userpass","description":"username/password auth"}' \
+     $VAULT_ADDR/v1/sys/auth/userpass
+```
+
+Or using a json file called my_file1.json
+
+```bash
+{
+  "type": "userpass",
+  "description": "username/password auth"
+}
+```
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request POST \
+     --data @my_file.json.json \
+     $VAULT_ADDR/v1/sys/auth/userpass
+```
+
+**2. Create a user with assigned policies**
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request POST \
+     --data '{
+       "password": "alice-password",
+       "policies": "default,cloud-policy",
+       "ttl": "1h",
+       "max_ttl": "24h",
+       "display_name": "Alice Example",
+       "disabled": false
+     }' \
+     $VAULT_ADDR/v1/auth/userpass/users/alice
+```
+
+Or using a json file called my_file2.json
+
+```bash
+{
+  "password": "alice-password",
+  "policies": "default,cloud-policy",
+  "ttl": "1h",
+  "max_ttl": "24h",
+  "display_name": "Alice Example",
+  "disabled": false
+}
+```
+```bash
+curl \
+  --header "X-Vault-Token: $VAULT_TOKEN" \
+  --request POST \
+  --data @my_file2.json \
+  $VAULT_ADDR/v1/auth/userpass/users/alice
+```
+
+**3. Update an existing user**
+
+To change password, policies, or metadata, call the same endpoint again with updated fields:
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request POST \
+     --data '{"password":"new-password","policies":"default,ops-policy"}' \
+     $VAULT_ADDR/v1/auth/userpass/users/alice
+```
+
+**4. Read user information (metadata)**
+To read stored user metadata (note: password is not returned):
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     $VAULT_ADDR/v1/auth/userpass/users/alice | jq .
+```
+Returned JSON includes policies, display_name, ttl, max_ttl, and disabled status.
+
+**5. Delete a user**
+Remove the user account:
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request DELETE \
+     $VAULT_ADDR/v1/auth/userpass/users/alice
+```
+
+**6. User login (authenticate) via userpass**
+A client authenticates by posting username/password to get a Vault token:
+
+```bash
+curl --request POST \
+     --data '{"password":"alice-password"}' \
+     $VAULT_ADDR/v1/auth/userpass/login/alice | jq .
+```
+
+**7. List all users**
+There is an endpoint to list the usernames under the userpass mount:
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     $VAULT_ADDR/v1/auth/userpass/users?list=true | jq .
+```
+If successful, .data.keys contains usernames. Note: Requires policy allowing list on auth/userpass/users.
+
+**8. Enable userpass at a custom path or with options**
+To enable at a custom mount path (e.g., auth/my-userpass) or set mount options, use sys/auth POST specifying path:
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request POST \
+     --data '{"type":"userpass","path":"my-userpass","description":"custom mount"}' \
+     $VAULT_ADDR/v1/sys/auth
+```
+Operations then use /v1/auth/my-userpass/... endpoints.
+
+**9. Configure mount-level settings (e.g., listing, token options)**
+You can tune mount options with sys/mounts/<path>/tune:
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request POST \
+     --data '{"default_lease_ttl":"1h","max_lease_ttl":"24h"}' \
+     $VAULT_ADDR/v1/sys/mounts/auth/userpass/tune
+```
+
+**10. Disable userpass auth method**
+To remove the mount entirely:
+
+```bash
+curl --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request DELETE \
+     $VAULT_ADDR/v1/sys/auth/userpass
+```
+This deletes all users under that mount. Use with caution.
+
+**11. Example: Create a user and login (full sequence)**
+
+```bash
+export VAULT_ADDR="http://127.0.0.1:8200"
+export VAULT_TOKEN="s.AdminToken"
+
+# Enable userpass
+curl -s --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request POST --data '{"type":"userpass"}' \
+     $VAULT_ADDR/v1/sys/auth/userpass
+
+# Create user bob
+curl -s --header "X-Vault-Token: $VAULT_TOKEN" \
+     --request POST \
+     --data '{"password":"bob-secret","policies":"default,dev-policy"}' \
+     $VAULT_ADDR/v1/auth/userpass/users/bob
+
+# Login as bob (get token)
+curl -s --request POST --data '{"password":"bob-secret"}' \
+     $VAULT_ADDR/v1/auth/userpass/login/bob | jq .
+```
+
+**12. Permissions required to manage userpass via API**
+The admin token (or calling token) must have policy capabilities:
+
+- sys/auth (create/delete) to enable/disable auth methods.
+- sys/mounts/*/tune to tune mount.
+- auth/userpass/users/* create/read/update/delete/list to manage users.
+- auth/userpass/login/* is public for login (no token required), but some mounts may restrict login behavior.
+
+Example minimal admin policy (not exhaustive):
+
+```bash
+path "sys/auth/*" {
+  capabilities = ["create","read","update","delete","list"]
+}
+path "auth/userpass/*" {
+  capabilities = ["create","read","update","delete","list"]
+}
+path "sys/mounts/*/tune" {
+  capabilities = ["update"]
+}
+```
+
+# 2.3 AppRole Auth Method using API
 
 - **Create an `auth.json` file:**
 
@@ -188,192 +420,6 @@ The response returns:
 curl --request POST \
      --data '{"role_id":"<ROLE_ID>","secret_id":"<SECRET_ID>"}' \
      http://127.0.0.1:8200/v1/auth/approle/login
-```
-
-
-# 2. Vault Authentication
-
-## 2.1 Vault Authentication using the CLI
-
-There are a few ways to autenticate to Vault when using CLI
-
-### Use the vault login command when using CLI
-
-**Token Helper**
-
-Caches the token after authentication. Stores the token in a local file so it can be referenced for subsequent requests.
-
-```bash
-vault login <User-Token> # By default, Vault login uses a token auth method
-```
-
-**authentication with userpass auth method using CLI**
-
-```bash
-vault login -method=userpass username=john # Used to obtain a token
-```
-
-**authentication with approle auth method using CLI**
-
-When the **approle** auth method is already enabled and the role **john** is already created.
-
-- **Get the `role-id`**
-
-```bash
-vault read auth/approle/role/john/role-id
-```
-
-- **Create the `secret-id`**
-
-```bash
-vault write -force auth/approle/role/john/secret-id
-```
-
-- **Create a login authentication**
-
-```bash
-vault write auth/approle/login \
-    role_id=<role-id> \
-    secret_id=<secret-id>
-```
-
-**authentication with okta auth method using CLI**
-
-- **Connect to the okta platform and create a token**
-- **Enable okta auth method in Vault**
-
-```bash
-vault auth enable okta
-```
-
-- **Create the configuration for okta auth**
-
-```bash
-vault write auth/okta/config \
-    base_url = "okta.com"
-    org_name = "<org-name>"
-    api_token = "<token-created>"
-```
-
-- **Create an okta user**
-
-```bash
-vault write auth/okta/users/john@org-name.com policies=org-name-policies
-```
-
-- **User authentication**
-
-```bash
-vault login -method=okta username=john@org-name.com
-```
-
-### Use the VAULT_TOKEN Environment Variable
-
-- Used if you already have a **token**
-- Parsing the JSON Response to obtain the Vault Token
-
-```bash
-export VAULT_ADDR="https://vault.example.com:8200" # Vault endpoint
-```
-
-```bash
-export VAULT_FORMAT=json # Send the response in JSON format every time
-```
-
-```bash
-OUTPUT=$(vault write auth/approle/login role_id="1234567" secret_id="1abnc567hhdd") # Provide role-id and secret-id for authentication
-```
-
-```bash
-VAULT_TOKEN=$(echo $OUTPUT | jq '.auth.client_token' -j) # Using jq to parse the JSON response
-```
-
-```bash
-vault login $VAULT_TOKEN # Authentication with the token
-```
-
-## 2.2 Vault Authentication using the API
-
-When you migrate from the Vault CLI to its HTTP API, authentication works slightly differently. Instead of the CLI persisting your token, the API returns a JSON payload containing:
-
-<p>
-    <img src="../images/auth_api2.png">
-</p>
-
-You must parse this JSON response, extract the client_token, and include it in the X-Vault-Token header for all future requests.
-
-**Note:**
-
-**You’re not storing tokens on disk as the CLI does. Securely manage your tokens in environment variables or secret managers.**
-
-### 1. Authenticating with AppRole
-AppRole authentication allows machines or applications to authenticate to Vault. No existing token is required to perform this login.
-
-**- Prepare the Login Payload**
-Create a JSON file (**auth.json**) containing your AppRole credentials:
-
-```bash
-{
-  "role_id": "<your_role_id>",
-  "secret_id": "<your_secret_id>"
-}
-```
-
-**- Send the Login Request**
-
-```bash
-curl --request POST \
-     --data @auth.json \
-     https://vault.example.com:8200/v1/auth/approle/login
-```
-
-    - `@auth.json`: Path to the JSON payload with role_id and secret_id.
-    - Endpoint: **/v1/auth/approle/login** signals Vault to authenticate via AppRole.
-
-**- Sample Response**
-A successful AppRole login returns a JSON object similar to:
-
-```bash
-{
-  "request_id": "0f874bea-16a6-c3da-8f20-1f2ef9cb5d22",
-  "lease_id": "",
-  "renewable": false,
-  "lease_duration": 0,
-  "data": null,
-  "wrap_info": null,
-  "warnings": null,
-  "auth": {
-    "client_token": "s.wjkffdrqM9QYTOYrUnUxXyX6",
-    "accessor": "Hbhmd3OfVTXnukBv7WxMrWld",
-    "policies": [
-      "admin",
-      "default"
-    ]
-  }
-}
-```
-Extract the **auth.client_token** value—this is your Vault API token.
-
-**- Using the Vault Token for Subsequent Requests**
-Include the token in the **X-Vault-Token** header for all Vault API calls. For example, to read a secret at **secret/data/my-secret**:
-
-```bash
-curl --header "X-Vault-Token: s.wjkffdrqM9QYTOYrUnUxXyX6" \
-     https://vault.example.com:8200/v1/secret/data/my-secret
-```
-
-Replace **my-secret** with the path to your desired secret. All reads, writes, renewals, and revocations follow the same pattern.
-
-**Warning**
-
-**Avoid exposing your Vault token in shared logs or command-history. Use environment variables or CI/CD secret storage to keep tokens confidential.**
-
-### 2. Authenticating with okta
-
-```bash
-curl --request POST \
-    --data @password.json \
-     https://127.0.0.1:8200/v1/auth/okta/login/john@org-name.com | jq
 ```
 
 

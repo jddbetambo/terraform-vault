@@ -1,0 +1,36 @@
+[
+    {
+        "name": "enable-userpass",
+        "method": "POST",
+        "path": "/v1/sys/auth/userpass",
+        "body": {
+            "type": "userpass",
+            "description": "Userpass auth mount"
+        }
+    },
+    {
+        "name": "create-policy-dev",
+        "method": "PUT",
+        "path": "/v1/sys/policies/acl/dev",
+        "body": {
+            "policy": "path \"secret/*\" { capabilities = [\"create\",\"read\",\"update\",\"delete\",\"list\"] }"
+        }
+    },
+    {
+        "name": "create-user-alice",
+        "method": "POST",
+        "path": "/v1/auth/userpass/users/alice",
+        "body": {
+            "password": "alicepassword",
+            "policies": "dev"
+        }
+    },
+    {
+        "name": "login-alice",
+        "method": "POST",
+        "path": "/v1/auth/userpass/login/alice",
+        "body": {
+            "password": "alicepassword"
+        }
+    }
+]
